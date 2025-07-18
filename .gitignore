@@ -1,0 +1,26 @@
+# Compiled binary
+gossh
+
+# Local scripts with secrets
+gemini-cli-key.sh
+
+# OS-specific files
+.DS_Store
+*~
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE settings folders
+.idea/
+.vscode/
+
+# IMPORTANT: Sensitive files
+# The following files are stored in ~/.gossh/ and contain sensitive data.
+# They should NEVER be committed to version control.
+#
+# secret.key
+# credentials.json
+# config.json
