@@ -2,14 +2,16 @@
 
 [简体中文](docs/README.zh.md)
 
-`gossh` is a command-line tool written in Go that provides a simple and secure way to manage and connect to your SSH servers. It allows you to save connection configurations, manage encrypted passwords, and easily connect to your servers with a simple command.
+`gossh` is a command-line tool written in Go that provides a simple and secure way to manage, connect, and execute commands on your SSH servers.
 
 ## Features
 
-- **Connection Management**: Add, list, and remove SSH connection configurations.
+- **Advanced Connection Management**: Add (interactively or via flags), list, remove, and group your SSH connections.
+- **Remote Command Execution**: Execute commands on a server without starting a full interactive session.
 - **Secure Password Storage**: Passwords are encrypted using AES-256 and stored locally.
-- **Multiple Authentication Methods**: Supports password, private key, and interactive password authentication.
-- **Easy to Use**: Simple and intuitive command-line interface.
+- **Connection Testing**: Test connectivity and authentication to a server without a full login.
+- **Configuration Portability**: Export all your connections and credentials to a single file for backup or migration, and import them on another machine.
+- **Multiple Authentication Methods**: Supports password, private key (with passphrase), and interactive password authentication.
 
 ## Installation
 
@@ -32,20 +34,26 @@
 
 ### Managing Connections
 
-- **Add a new connection**:
+- **Add a new connection (Interactive)**:
     ```sh
-    gossh add -n <connection-name> -u <user> -H <host> [-p <port>] [-k <key-path>] [-P <password-alias>]
+    gossh add -i
     ```
-    - `-n`: Connection name (required)
-    - `-u`: Username (required)
-    - `-H`: Host address (required)
-    - `-p`: Port number (defaults to 22)
-    - `-k`: Path to your private key
-    - `-P`: Use a saved password by its alias
+- **Add a new connection (Flags)**:
+    ```sh
+    gossh add -n <name> -u <user> -H <host> [-g <group>] [-p <port>] [-k <key-path>] [-P <password-alias>]
+    ```
+    - `-i, --interactive`: Use interactive mode.
+    - `-g, --group`: Assign the connection to a group.
 
 - **List saved connections**:
     ```sh
     gossh list
+    gossh list -g <group-name> # Filter by group
+    ```
+
+- **List all groups**:
+    ```sh
+    gossh groups
     ```
 
 - **Remove a connection**:
@@ -53,32 +61,52 @@
     gossh remove <connection-name>
     ```
 
+- **Test a connection**:
+    ```sh
+    gossh test <connection-name>
+    ```
+
+### Connecting and Executing
+
+- **Connect to a server (Interactive Session)**:
+    ```sh
+    gossh connect <connection-name>
+    ```
+
+- **Execute a remote command**:
+    ```sh
+    gossh exec <connection-name> "your command here"
+    ```
+    Example: `gossh exec web-server "sudo systemctl status nginx"`
+
 ### Managing Passwords
 
 - **Add a new password**:
     ```sh
     gossh password add <alias>
     ```
-    You will be prompted to enter the password.
-
 - **List saved password aliases**:
     ```sh
     gossh password list
     ```
-
 - **Remove a password**:
     ```sh
     gossh password remove <alias>
     ```
 
-### Connecting to a Server
+### Configuration Management
 
-- **Connect to a saved connection**:
+- **Export configuration**:
     ```sh
-    gossh connect <connection-name>
+    gossh config export > gossh_backup.json
     ```
+- **Import configuration**:
+    ```sh
+    gossh config import gossh_backup.json
+    ```
+    You will be prompted for confirmation before your existing configuration is overwritten. Use `-f` or `--force` to skip the prompt.
 
-## Configuration
+## Configuration Files
 
 Configuration files are stored in `~/.config/gossh/`:
 

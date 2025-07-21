@@ -1,5 +1,6 @@
 # Compiled binary
 gossh
+gossh.exe
 
 # Local scripts with secrets
 gemini-cli-key.sh

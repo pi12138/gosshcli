@@ -9,6 +9,7 @@ import (
 
 type Connection struct {
 	Name            string `json:"name"`
+	Group           string `json:"group,omitempty"`
 	User            string `json:"user"`
 	Host            string `json:"host"`
 	Port            int    `json:"port"`
