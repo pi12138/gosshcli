@@ -80,4 +80,5 @@ func init() {
 	PasswordCmd.AddCommand(addPasswordCmd)
 	PasswordCmd.AddCommand(listPasswordCmd)
 	PasswordCmd.AddCommand(removePasswordCmd)
+	rootCmd.AddCommand(PasswordCmd)
 }

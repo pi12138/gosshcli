@@ -1,5 +1,7 @@
 # gossh
 
+[简体中文](docs/README.zh.md)
+
 `gossh` is a command-line tool written in Go that provides a simple and secure way to manage and connect to your SSH servers. It allows you to save connection configurations, manage encrypted passwords, and easily connect to your servers with a simple command.
 
 ## Features
