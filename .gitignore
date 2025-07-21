@@ -4,6 +4,10 @@ gossh
 # Local scripts with secrets
 gemini-cli-key.sh
 
+# Project-specific ignores
+.env
+.nvmrc
+
 # OS-specific files
 .DS_Store
 *~
