@@ -13,6 +13,17 @@ var rootCmd = &cobra.Command{
 	Short: "gossh is a ssh client implemented in Go",
 }
 
+func init() {
+	// Disable the default 'completion' command and hide the 'help' command
+	rootCmd.CompletionOptions.DisableDefaultCmd = true
+	rootCmd.SetHelpCommand(&cobra.Command{
+		Use:    "help [command]",
+		Short:  "Help about any command",
+		Long:   `Help provides help for any command in the application.`,
+		Hidden: true,
+	})
+}
+
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {

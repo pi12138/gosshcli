@@ -12,7 +12,7 @@ import (
 var execCmd = &cobra.Command{
 	Use:   "exec <name> <command>",
 	Short: "Execute a command on a remote server",
-	Long:  `Execute a command on a remote server without starting an interactive session. 
+	Long: `Execute a command on a remote server without starting an interactive session. 
 The command should be provided as a single string argument.`,
 	Args: cobra.MinimumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {

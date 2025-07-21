@@ -11,7 +11,7 @@ import (
 var testCmd = &cobra.Command{
 	Use:   "test <name>",
 	Short: "Test a connection configuration",
-	Long:  `Tests a saved connection configuration by attempting to establish an SSH connection. 
+	Long: `Tests a saved connection configuration by attempting to establish an SSH connection. 
 It authenticates and then immediately disconnects, reporting success or failure.`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -50,4 +50,3 @@ It authenticates and then immediately disconnects, reporting success or failure.
 func init() {
 	rootCmd.AddCommand(testCmd)
 }
-

@@ -36,19 +36,19 @@
 
 - **Add a new connection (Interactive)**:
     ```sh
-    gossh add -i
+    gossh config add -i
     ```
 - **Add a new connection (Flags)**:
     ```sh
-    gossh add -n <name> -u <user> -H <host> [-g <group>] [-p <port>] [-k <key-path>] [-P <password-alias>]
+    gossh config add -n <name> -u <user> -H <host> [-g <group>] [-p <port>] [-k <key-path>] [-P <password-alias>]
     ```
     - `-i, --interactive`: Use interactive mode.
     - `-g, --group`: Assign the connection to a group.
 
 - **List saved connections**:
     ```sh
-    gossh list
-    gossh list -g <group-name> # Filter by group
+    gossh config list
+    gossh config list -g <group-name> # Filter by group
     ```
 
 - **List all groups**:
@@ -58,7 +58,7 @@
 
 - **Remove a connection**:
     ```sh
-    gossh remove <connection-name>
+    gossh config remove <connection-name>
     ```
 
 - **Test a connection**:

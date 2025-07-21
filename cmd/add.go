@@ -161,5 +161,4 @@ func init() {
 	addCmd.Flags().StringP("key", "k", "", "Path to private key")
 	addCmd.Flags().StringP("use-password", "P", "", "Use a saved password by its alias")
 	addCmd.Flags().BoolP("interactive", "i", false, "Use interactive mode to add a new connection")
-	rootCmd.AddCommand(addCmd)
 }
