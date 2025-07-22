@@ -140,3 +140,6 @@ Configuration files are stored in `~/.config/gossh/`:
 - `secret.key`: The encryption key for your passwords.
 
 **Note**: Do not share your `secret.key` or `credentials.json` files as they contain sensitive information.
+
+---
+This project was created by pi12138 with the assistance of Google's Gemini.

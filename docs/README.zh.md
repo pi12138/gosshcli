@@ -138,3 +138,6 @@
 - `secret.key`: 用于密码加密的密钥。
 
 **注意**: 请勿共享您的 `secret.key` 或 `credentials.json` 文件，因为它们包含敏感信息。
+
+---
+本项目由 pi12138 在 Google Gemini 的辅助下开发。
