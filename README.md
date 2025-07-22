@@ -6,7 +6,7 @@
 
 ## Features
 
-- **Advanced Connection Management**: Add (interactively or via flags), list, remove, and group your SSH connections.
+- **Connection Management**: Add (interactively or via flags), list, remove, and group your SSH connections.
 - **Remote Command Execution**: Execute commands on a server without starting a full interactive session.
 - **Secure Password Storage**: Passwords are encrypted using AES-256 and stored locally.
 - **Connection Testing**: Test connectivity and authentication to a server without a full login.
@@ -32,41 +32,43 @@
 
 ## Usage
 
-### Managing Connections
+### Managing Connections (`config` command)
 
-- **Add a new connection (Interactive)**:
+Use the `gossh config` subcommands to manage your connection configurations.
+
+- **Add a new connection**:
     ```sh
-    gossh config add -i
+    gossh config add [flags]
     ```
-- **Add a new connection (Flags)**:
-    ```sh
-    gossh config add -n <name> -u <user> -H <host> [-g <group>] [-p <port>] [-k <key-path>] [-P <password-alias>]
-    ```
-    - `-i, --interactive`: Use interactive mode.
+    **Modes**:
+    - **Interactive Mode**: `gossh config add -i` or `gossh config add --interactive`
+    - **Flag-based Mode**:
+        ```sh
+        gossh config add -n <name> -u <user> -H <host> [other-flags...]
+        ```
+    **Flags**:
+    - `-i, --interactive`: Use interactive mode to add a new connection.
+    - `-n, --name`: The connection name (required in non-interactive mode).
+    - `-u, --user`: The username (required in non-interactive mode).
+    - `-H, --host`: The host address (required in non-interactive mode).
     - `-g, --group`: Assign the connection to a group.
+    - `-p, --port`: The port number (defaults to 22).
+    - `-k, --key`: Path to the private key.
+    - `-P, --use-password`: Use a saved password by its alias for authentication.
 
 - **List saved connections**:
     ```sh
-    gossh config list
-    gossh config list -g <group-name> # Filter by group
+    gossh config list [flags]
     ```
-
-- **List all groups**:
-    ```sh
-    gossh groups
-    ```
+    **Flags**:
+    - `-g, --group`: Filter connections by group name.
 
 - **Remove a connection**:
     ```sh
     gossh config remove <connection-name>
     ```
 
-- **Test a connection**:
-    ```sh
-    gossh test <connection-name>
-    ```
-
-### Connecting and Executing
+### Connecting & Executing
 
 - **Connect to a server (Interactive Session)**:
     ```sh
@@ -75,36 +77,59 @@
 
 - **Execute a remote command**:
     ```sh
-    gossh exec <connection-name> "your command here"
+    gossh exec <connection-name> "<your-command>"
     ```
     Example: `gossh exec web-server "sudo systemctl status nginx"`
 
-### Managing Passwords
+- **Test a connection**:
+    ```sh
+    gossh test <connection-name>
+    ```
+    This command attempts to authenticate and then immediately disconnects to verify the configuration.
+
+### Managing Passwords (`password` command)
+
+Securely store and manage passwords for your connections.
 
 - **Add a new password**:
     ```sh
     gossh password add <alias>
     ```
+    You will be prompted to enter the password.
+
 - **List saved password aliases**:
     ```sh
     gossh password list
     ```
+
 - **Remove a password**:
     ```sh
     gossh password remove <alias>
     ```
 
-### Configuration Management
+### Managing Groups
+
+- **List all groups**:
+    ```sh
+    gossh groups
+    ```
+
+### Importing & Exporting
 
 - **Export configuration**:
     ```sh
     gossh config export > gossh_backup.json
     ```
+    This prints all connections and encrypted credentials to standard output.
+
 - **Import configuration**:
     ```sh
-    gossh config import gossh_backup.json
+    gossh config import <file-path>
     ```
-    You will be prompted for confirmation before your existing configuration is overwritten. Use `-f` or `--force` to skip the prompt.
+    Imports a configuration from a file created by the `export` command.
+    **Warning**: This will overwrite your existing configuration.
+    **Flags**:
+    - `-f, --force`: Skip the confirmation prompt before overwriting.
 
 ## Configuration Files
 
@@ -114,8 +139,4 @@ Configuration files are stored in `~/.config/gossh/`:
 - `credentials.json`: Stores encrypted passwords.
 - `secret.key`: The encryption key for your passwords.
 
-**Note**: Do not share your `secret.key` or `credentials.json` files.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a pull request or open an issue.
+**Note**: Do not share your `secret.key` or `credentials.json` files as they contain sensitive information.
