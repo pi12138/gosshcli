@@ -29,3 +29,4 @@ Thumbs.db
 # secret.key
 # credentials.json
 # config.json
+dist/
