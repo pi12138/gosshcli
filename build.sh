@@ -33,7 +33,7 @@ for PLATFORM in "${PLATFORMS[@]}"; do
   fi
 
   echo "Building for $OS/$ARCH ..."
-  GOOS=$OS GOARCH=$ARCH CGO_ENABLED=0 go build -o "$OUTPUT_DIR/$BINARY_NAME"
+  GOOS=$OS GOARCH=$ARCH CGO_ENABLED=0 go build -ldflags="-X 'gossh/cmd.version=$VERSION'" -o "$OUTPUT_DIR/$BINARY_NAME"
 
   if [ $? -ne 0 ]; then
     echo "Build failed for $OS/$ARCH"

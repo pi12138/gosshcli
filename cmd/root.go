@@ -8,12 +8,16 @@ import (
 	"os"
 )
 
+var version string
+
 var rootCmd = &cobra.Command{
-	Use:   "gossh",
-	Short: "gossh is a ssh client implemented in Go",
+	Use:     "gossh",
+	Short:   "gossh is a ssh client implemented in Go",
+	Version: version,
 }
 
 func init() {
+	rootCmd.SetVersionTemplate(`{{printf "%s\n" .Version}}`)
 	// Disable the default 'completion' command and hide the 'help' command
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 	rootCmd.SetHelpCommand(&cobra.Command{
@@ -27,6 +31,7 @@ func init() {
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
+
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)

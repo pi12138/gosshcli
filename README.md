@@ -142,4 +142,4 @@ Configuration files are stored in `~/.config/gossh/`:
 **Note**: Do not share your `secret.key` or `credentials.json` files as they contain sensitive information.
 
 ---
-This project was created by pi12138 with the assistance of Google's Gemini.
+This project was initiated and guided by pi12138, with development contributions from Qwen and Google's Gemini.
