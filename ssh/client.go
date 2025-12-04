@@ -3,9 +3,12 @@ package ssh
 import (
 	"fmt"
 	"gossh/config"
+	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 
+	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"
 )
@@ -171,5 +174,175 @@ func TestConnection(conn *config.Connection) error {
 	}
 	defer client.Close()
 	// If newClient succeeded, the connection is considered successful.
+	return nil
+}
+
+// UploadFile uploads a local file or directory to the remote server.
+func UploadFile(conn *config.Connection, localPath, remotePath string, recursive bool) error {
+	client, err := newClient(conn)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	sftpClient, err := sftp.NewClient(client)
+	if err != nil {
+		return fmt.Errorf("failed to create SFTP client: %v", err)
+	}
+	defer sftpClient.Close()
+
+	localInfo, err := os.Stat(localPath)
+	if err != nil {
+		return fmt.Errorf("failed to stat local path: %v", err)
+	}
+
+	if localInfo.IsDir() {
+		if !recursive {
+			return fmt.Errorf("'%s' is a directory, use -r flag for recursive copy", localPath)
+		}
+		return uploadDir(sftpClient, localPath, remotePath)
+	}
+
+	return uploadFile(sftpClient, localPath, remotePath)
+}
+
+// uploadFile uploads a single file.
+func uploadFile(sftpClient *sftp.Client, localPath, remotePath string) error {
+	srcFile, err := os.Open(localPath)
+	if err != nil {
+		return fmt.Errorf("failed to open local file: %v", err)
+	}
+	defer srcFile.Close()
+
+	dstFile, err := sftpClient.Create(remotePath)
+	if err != nil {
+		return fmt.Errorf("failed to create remote file: %v", err)
+	}
+	defer dstFile.Close()
+
+	bytes, err := io.Copy(dstFile, srcFile)
+	if err != nil {
+		return fmt.Errorf("failed to copy file: %v", err)
+	}
+
+	fmt.Printf("Uploaded: %s -> %s (%d bytes)\n", localPath, remotePath, bytes)
+	return nil
+}
+
+// uploadDir recursively uploads a directory.
+func uploadDir(sftpClient *sftp.Client, localPath, remotePath string) error {
+	// Create remote directory
+	err := sftpClient.MkdirAll(remotePath)
+	if err != nil {
+		return fmt.Errorf("failed to create remote directory: %v", err)
+	}
+
+	entries, err := os.ReadDir(localPath)
+	if err != nil {
+		return fmt.Errorf("failed to read local directory: %v", err)
+	}
+
+	for _, entry := range entries {
+		localFilePath := filepath.Join(localPath, entry.Name())
+		remoteFilePath := filepath.Join(remotePath, entry.Name())
+
+		if entry.IsDir() {
+			err = uploadDir(sftpClient, localFilePath, remoteFilePath)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = uploadFile(sftpClient, localFilePath, remoteFilePath)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+// DownloadFile downloads a remote file or directory to the local machine.
+func DownloadFile(conn *config.Connection, remotePath, localPath string, recursive bool) error {
+	client, err := newClient(conn)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	sftpClient, err := sftp.NewClient(client)
+	if err != nil {
+		return fmt.Errorf("failed to create SFTP client: %v", err)
+	}
+	defer sftpClient.Close()
+
+	remoteInfo, err := sftpClient.Stat(remotePath)
+	if err != nil {
+		return fmt.Errorf("failed to stat remote path: %v", err)
+	}
+
+	if remoteInfo.IsDir() {
+		if !recursive {
+			return fmt.Errorf("'%s' is a directory, use -r flag for recursive copy", remotePath)
+		}
+		return downloadDir(sftpClient, remotePath, localPath)
+	}
+
+	return downloadFile(sftpClient, remotePath, localPath)
+}
+
+// downloadFile downloads a single file.
+func downloadFile(sftpClient *sftp.Client, remotePath, localPath string) error {
+	srcFile, err := sftpClient.Open(remotePath)
+	if err != nil {
+		return fmt.Errorf("failed to open remote file: %v", err)
+	}
+	defer srcFile.Close()
+
+	dstFile, err := os.Create(localPath)
+	if err != nil {
+		return fmt.Errorf("failed to create local file: %v", err)
+	}
+	defer dstFile.Close()
+
+	bytes, err := io.Copy(dstFile, srcFile)
+	if err != nil {
+		return fmt.Errorf("failed to copy file: %v", err)
+	}
+
+	fmt.Printf("Downloaded: %s -> %s (%d bytes)\n", remotePath, localPath, bytes)
+	return nil
+}
+
+// downloadDir recursively downloads a directory.
+func downloadDir(sftpClient *sftp.Client, remotePath, localPath string) error {
+	// Create local directory
+	err := os.MkdirAll(localPath, 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create local directory: %v", err)
+	}
+
+	entries, err := sftpClient.ReadDir(remotePath)
+	if err != nil {
+		return fmt.Errorf("failed to read remote directory: %v", err)
+	}
+
+	for _, entry := range entries {
+		remoteFilePath := filepath.Join(remotePath, entry.Name())
+		localFilePath := filepath.Join(localPath, entry.Name())
+
+		if entry.IsDir() {
+			err = downloadDir(sftpClient, remoteFilePath, localFilePath)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = downloadFile(sftpClient, remoteFilePath, localFilePath)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }

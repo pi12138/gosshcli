@@ -8,6 +8,7 @@
 
 - **Connection Management**: Add (interactively or via flags), list, remove, and group your SSH connections.
 - **Remote Command Execution**: Execute commands on a server without starting a full interactive session.
+- **File Transfer**: Upload and download files or directories between local and remote hosts using SFTP.
 - **Secure Password Storage**: Passwords are encrypted using AES-256 and stored locally.
 - **Connection Testing**: Test connectivity and authentication to a server without a full login.
 - **Configuration Portability**: Export all your connections and credentials to a single file for backup or migration, and import them on another machine.
@@ -80,6 +81,23 @@ Use the `gossh config` subcommands to manage your connection configurations.
     gossh exec <connection-name> "<your-command>"
     ```
     Example: `gossh exec web-server "sudo systemctl status nginx"`
+
+- **Copy files (Upload/Download)**:
+    ```sh
+    gossh cp [source] [destination]
+    ```
+    **Upload** (local to remote):
+    ```sh
+    gossh cp /local/file.txt server:/remote/path/
+    gossh cp -r /local/directory server:/remote/path/
+    ```
+    **Download** (remote to local):
+    ```sh
+    gossh cp server:/remote/file.txt /local/path/
+    gossh cp -r server:/remote/directory /local/path/
+    ```
+    **Flags**:
+    - `-r, --recursive`: Copy directories recursively.
 
 - **Test a connection**:
     ```sh
