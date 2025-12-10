@@ -8,6 +8,7 @@
 
 - **Connection Management**: Add (interactively or via flags), list, remove, and group your SSH connections.
 - **Remote Command Execution**: Execute commands on a server without starting a full interactive session.
+- **Secure File Transfer**: Copy files between local and remote systems using SCP protocol with support for recursive directory transfers.
 - **Secure Password Storage**: Passwords are encrypted using AES-256 and stored locally.
 - **Connection Testing**: Test connectivity and authentication to a server without a full login.
 - **Configuration Portability**: Export all your connections and credentials to a single file for backup or migration, and import them on another machine.
@@ -86,6 +87,42 @@ Use the `gossh config` subcommands to manage your connection configurations.
     gossh test <connection-name>
     ```
     This command attempts to authenticate and then immediately disconnects to verify the configuration.
+
+### File Transfer (`scp` command)
+
+Transfer files between local and remote systems using SCP protocol.
+
+- **Upload a file to a remote server**:
+    ```sh
+    gossh scp localfile.txt user@host:/path/to/destination
+    ```
+
+- **Download a file from a remote server**:
+    ```sh
+    gossh scp user@host:/path/to/file.txt localfile.txt
+    ```
+
+- **Using pre-configured connection**:
+    ```sh
+    gossh scp --name myserver localfile.txt /remote/path/
+    ```
+
+- **Copy directories recursively**:
+    ```sh
+    gossh scp -r localdir/ user@host:/remote/path/
+    ```
+
+- **Preserve file timestamps**:
+    ```sh
+    gossh scp -p localfile.txt user@host:/remote/path/
+    ```
+
+**SCP Flags**:
+- `-r, --recursive`: Copy directories recursively
+- `-p, --preserve`: Preserve modification times
+- `-C, --compress`: Enable compression
+- `-n, --name`: Use a pre-configured connection by its name
+- `-P, --port`: Port number for user@host mode (default: 22)
 
 ### Managing Passwords (`password` command)
 
