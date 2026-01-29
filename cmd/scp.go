@@ -2,38 +2,39 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"gossh/config"
 	"gossh/ssh"
 	"os"
 	"strings"
+
+	"github.com/spf13/cobra"
 )
 
-var cpCmd = &cobra.Command{
-	Use:   "cp [source] [destination]",
-	Short: "Copy files between local and remote hosts (similar to scp)",
+var scpCmd = &cobra.Command{
+	Use:   "scp [source] [destination]",
+	Short: "Copy files between local and remote hosts (secure copy protocol)",
 	Long: `Copy files or directories between local and remote hosts using SFTP.
 
 Usage:
-  - Upload:   gossh cp <local-path> <connection-name>:<remote-path>
-  - Download: gossh cp <connection-name>:<remote-path> <local-path>
+  - Upload:   gossh scp <local-path> <connection-name>:<remote-path>
+  - Download: gossh scp <connection-name>:<remote-path> <local-path>
 
 Use the -r flag to copy directories recursively.
 
 Examples:
-  gossh cp /local/file.txt myserver:/remote/path/
-  gossh cp myserver:/remote/file.txt /local/path/
-  gossh cp -r /local/directory myserver:/remote/path/
-  gossh cp -r myserver:/remote/directory /local/path/`,
-	Run: runCp,
+  gossh scp /local/file.txt myserver:/remote/path/
+  gossh scp myserver:/remote/file.txt /local/path/
+  gossh scp -r /local/directory myserver:/remote/path/
+  gossh scp -r myserver:/remote/directory /local/path/`,
+	Run: runScp,
 }
 
 func init() {
-	cpCmd.Flags().BoolP("recursive", "r", false, "Copy directories recursively")
-	rootCmd.AddCommand(cpCmd)
+	scpCmd.Flags().BoolP("recursive", "r", false, "Copy directories recursively")
+	rootCmd.AddCommand(scpCmd)
 }
 
-func runCp(cmd *cobra.Command, args []string) {
+func runScp(cmd *cobra.Command, args []string) {
 	if len(args) != 2 {
 		fmt.Println("Error: Please provide both source and destination.")
 		_ = cmd.Help()

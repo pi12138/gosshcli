@@ -84,17 +84,17 @@ Use the `gossh config` subcommands to manage your connection configurations.
 
 - **Copy files (Upload/Download)**:
     ```sh
-    gossh cp [source] [destination]
+    gossh scp [source] [destination]
     ```
     **Upload** (local to remote):
     ```sh
-    gossh cp /local/file.txt server:/remote/path/
-    gossh cp -r /local/directory server:/remote/path/
+    gossh scp /local/file.txt server:/remote/path/
+    gossh scp -r /local/directory server:/remote/path/
     ```
     **Download** (remote to local):
     ```sh
-    gossh cp server:/remote/file.txt /local/path/
-    gossh cp -r server:/remote/directory /local/path/
+    gossh scp server:/remote/file.txt /local/path/
+    gossh scp -r server:/remote/directory /local/path/
     ```
     **Flags**:
     - `-r, --recursive`: Copy directories recursively.

@@ -79,6 +79,23 @@
     ```
     示例: `gossh exec web-server "sudo systemctl status nginx"`
 
+- **复制文件 (上传/下载)**:
+    ```sh
+    gossh scp [源路径] [目标路径]
+    ```
+    **上传** (本地到远程):
+    ```sh
+    gossh scp /本地/文件.txt 服务器:/远程/路径/
+    gossh scp -r /本地/目录 服务器:/远程/路径/
+    ```
+    **下载** (远程到本地):
+    ```sh
+    gossh scp 服务器:/远程/文件.txt /本地/路径/
+    gossh scp -r 服务器:/远程/目录 /本地/路径/
+    ```
+    **标志**:
+    - `-r, --recursive`: 递归复制整个目录。
+
 - **测试连接**:
     ```sh
     gossh test <连接名称>
