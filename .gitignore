@@ -21,6 +21,7 @@ Thumbs.db
 # IDE settings folders
 .idea/
 .vscode/
+.gemini/
 
 # IMPORTANT: Sensitive files
 # The following files are stored in ~/.gossh/ and contain sensitive data.
