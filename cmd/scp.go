@@ -31,6 +31,7 @@ Examples:
 
 func init() {
 	scpCmd.Flags().BoolP("recursive", "r", false, "Copy directories recursively")
+	scpCmd.Flags().BoolP("force", "f", false, "Force overwrite of existing files")
 	rootCmd.AddCommand(scpCmd)
 }
 
@@ -42,6 +43,7 @@ func runScp(cmd *cobra.Command, args []string) {
 	}
 
 	recursive, _ := cmd.Flags().GetBool("recursive")
+	force, _ := cmd.Flags().GetBool("force")
 	source := args[0]
 	destination := args[1]
 
@@ -84,7 +86,7 @@ func runScp(cmd *cobra.Command, args []string) {
 		}
 
 		fmt.Printf("Downloading from %s@%s:%s to %s...\n", conn.User, conn.Host, remotePath, localPath)
-		err = ssh.DownloadFile(conn, remotePath, localPath, recursive)
+		err = ssh.DownloadFileWithOpts(conn, remotePath, localPath, recursive, force)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
@@ -108,7 +110,7 @@ func runScp(cmd *cobra.Command, args []string) {
 		}
 
 		fmt.Printf("Uploading from %s to %s@%s:%s...\n", localPath, conn.User, conn.Host, remotePath)
-		err = ssh.UploadFile(conn, localPath, remotePath, recursive)
+		err = ssh.UploadFileWithOpts(conn, localPath, remotePath, recursive, force)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)

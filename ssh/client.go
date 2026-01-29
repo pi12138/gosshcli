@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/cheggaaa/pb/v3"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"
@@ -179,6 +180,11 @@ func TestConnection(conn *config.Connection) error {
 
 // UploadFile uploads a local file or directory to the remote server.
 func UploadFile(conn *config.Connection, localPath, remotePath string, recursive bool) error {
+	return UploadFileWithOpts(conn, localPath, remotePath, recursive, false)
+}
+
+// UploadFileWithOpts uploads a local file or directory to the remote server with options.
+func UploadFileWithOpts(conn *config.Connection, localPath, remotePath string, recursive, force bool) error {
 	client, err := newClient(conn)
 	if err != nil {
 		return err
@@ -203,16 +209,45 @@ func UploadFile(conn *config.Connection, localPath, remotePath string, recursive
 		return uploadDir(sftpClient, localPath, remotePath)
 	}
 
-	return uploadFile(sftpClient, localPath, remotePath)
+	return uploadFileWithOpts(sftpClient, localPath, remotePath, force)
 }
 
 // uploadFile uploads a single file.
 func uploadFile(sftpClient *sftp.Client, localPath, remotePath string) error {
+	return uploadFileWithOpts(sftpClient, localPath, remotePath, false)
+}
+
+// uploadFileWithOpts uploads a single file with options.
+func uploadFileWithOpts(sftpClient *sftp.Client, localPath, remotePath string, force bool) error {
 	srcFile, err := os.Open(localPath)
 	if err != nil {
 		return fmt.Errorf("failed to open local file: %v", err)
 	}
 	defer srcFile.Close()
+
+	// Get file info to determine size for progress bar
+	fileInfo, err := srcFile.Stat()
+	if err != nil {
+		return fmt.Errorf("failed to get file info: %v", err)
+	}
+	fileSize := fileInfo.Size()
+
+	// Check if remote path is a directory
+	remoteInfo, err := sftpClient.Stat(remotePath)
+	if err == nil && remoteInfo.IsDir() {
+		// If remote path is a directory, append filename to it
+		_, localFileName := filepath.Split(localPath)
+		remotePath = filepath.Join(remotePath, localFileName)
+	}
+
+	// Check if remote file already exists
+	remoteInfo, err = sftpClient.Stat(remotePath)
+	if err == nil {
+		// Remote file exists
+		if !force {
+			return fmt.Errorf("remote file '%s' already exists. Use -f flag to force overwrite", remotePath)
+		}
+	}
 
 	dstFile, err := sftpClient.Create(remotePath)
 	if err != nil {
@@ -220,7 +255,15 @@ func uploadFile(sftpClient *sftp.Client, localPath, remotePath string) error {
 	}
 	defer dstFile.Close()
 
-	bytes, err := io.Copy(dstFile, srcFile)
+	// Create progress bar
+	bar := pb.Full.Start64(fileSize)
+	bar.Set(pb.Bytes, true)
+	barReader := bar.NewProxyReader(srcFile)
+
+	// Copy with progress bar
+	bytes, err := io.Copy(dstFile, barReader)
+	bar.Finish()
+
 	if err != nil {
 		return fmt.Errorf("failed to copy file: %v", err)
 	}
@@ -264,6 +307,11 @@ func uploadDir(sftpClient *sftp.Client, localPath, remotePath string) error {
 
 // DownloadFile downloads a remote file or directory to the local machine.
 func DownloadFile(conn *config.Connection, remotePath, localPath string, recursive bool) error {
+	return DownloadFileWithOpts(conn, remotePath, localPath, recursive, false)
+}
+
+// DownloadFileWithOpts downloads a remote file or directory to the local machine with options.
+func DownloadFileWithOpts(conn *config.Connection, remotePath, localPath string, recursive, force bool) error {
 	client, err := newClient(conn)
 	if err != nil {
 		return err
@@ -288,16 +336,45 @@ func DownloadFile(conn *config.Connection, remotePath, localPath string, recursi
 		return downloadDir(sftpClient, remotePath, localPath)
 	}
 
-	return downloadFile(sftpClient, remotePath, localPath)
+	return downloadFileWithOpts(sftpClient, remotePath, localPath, force)
 }
 
 // downloadFile downloads a single file.
 func downloadFile(sftpClient *sftp.Client, remotePath, localPath string) error {
+	return downloadFileWithOpts(sftpClient, remotePath, localPath, false)
+}
+
+// downloadFileWithOpts downloads a single file with options.
+func downloadFileWithOpts(sftpClient *sftp.Client, remotePath, localPath string, force bool) error {
 	srcFile, err := sftpClient.Open(remotePath)
 	if err != nil {
 		return fmt.Errorf("failed to open remote file: %v", err)
 	}
 	defer srcFile.Close()
+
+	// Get remote file info to determine size for progress bar
+	fileInfo, err := srcFile.Stat()
+	if err != nil {
+		return fmt.Errorf("failed to get remote file info: %v", err)
+	}
+	fileSize := fileInfo.Size()
+
+	// Check if local path is a directory
+	localInfo, err := os.Stat(localPath)
+	if err == nil && localInfo.IsDir() {
+		// If local path is a directory, append filename to it
+		remoteFileName := filepath.Base(remotePath)
+		localPath = filepath.Join(localPath, remoteFileName)
+	}
+
+	// Check if local file already exists
+	localInfo, err = os.Stat(localPath)
+	if err == nil {
+		// Local file exists
+		if !force {
+			return fmt.Errorf("local file '%s' already exists. Use -f flag to force overwrite", localPath)
+		}
+	}
 
 	dstFile, err := os.Create(localPath)
 	if err != nil {
@@ -305,7 +382,15 @@ func downloadFile(sftpClient *sftp.Client, remotePath, localPath string) error {
 	}
 	defer dstFile.Close()
 
-	bytes, err := io.Copy(dstFile, srcFile)
+	// Create progress bar
+	bar := pb.Full.Start64(fileSize)
+	bar.Set(pb.Bytes, true)
+	barReader := bar.NewProxyReader(srcFile)
+
+	// Copy with progress bar
+	bytes, err := io.Copy(dstFile, barReader)
+	bar.Finish()
+
 	if err != nil {
 		return fmt.Errorf("failed to copy file: %v", err)
 	}
