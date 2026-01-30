@@ -3,23 +3,23 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"gossh/config"
-	"gossh/ssh"
+	"gossh/internal/config"
+	"gossh/internal/i18n"
+	"gossh/internal/ssh"
 	"os"
 )
 
 var testCmd = &cobra.Command{
 	Use:   "test <name>",
-	Short: "Test a connection configuration",
-	Long: `Tests a saved connection configuration by attempting to establish an SSH connection. 
-It authenticates and then immediately disconnects, reporting success or failure.`,
-	Args: cobra.ExactArgs(1),
+	Short: i18n.T("test.short"),
+	Long:  i18n.T("test.long"),
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		connectionName := args[0]
 
 		connections, err := config.LoadConnections()
 		if err != nil {
-			fmt.Println("Error loading connections:", err)
+			fmt.Println(i18n.TWith("error.loading.connections", map[string]interface{}{"Error": err}))
 			os.Exit(1)
 		}
 
@@ -32,21 +32,15 @@ It authenticates and then immediately disconnects, reporting success or failure.
 		}
 
 		if conn == nil {
-			fmt.Printf("Error: connection '%s' not found\n", connectionName)
+			fmt.Println(i18n.TWith("error.connection.not.found", map[string]interface{}{"Name": connectionName}))
 			os.Exit(1)
 		}
 
-		// We need a way to test the connection without a full interactive session.
-		// Let's create a dedicated function in the ssh package for this.
 		if err := ssh.TestConnection(conn); err != nil {
-			fmt.Printf("Connection test for '%s' failed: %v\n", connectionName, err)
+			fmt.Println(i18n.TWith("test.failed", map[string]interface{}{"Name": connectionName, "Error": err}))
 			os.Exit(1)
 		}
 
-		fmt.Printf("Connection test for '%s' successful!\n", connectionName)
+		fmt.Println(i18n.TWith("test.success", map[string]interface{}{"Name": connectionName}))
 	},
-}
-
-func init() {
-	rootCmd.AddCommand(testCmd)
 }

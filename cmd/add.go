@@ -4,7 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/spf13/cobra"
-	"gossh/config"
+	"gossh/internal/config"
+	"gossh/internal/i18n"
 	"os"
 	"strconv"
 	"strings"
@@ -12,7 +13,7 @@ import (
 
 var addCmd = &cobra.Command{
 	Use:   "add",
-	Short: "Add a new connection configuration",
+	Short: i18n.T("add.short"),
 	Run: func(cmd *cobra.Command, args []string) {
 		interactive, _ := cmd.Flags().GetBool("interactive")
 
@@ -34,16 +35,16 @@ func runFlagBasedAdd(cmd *cobra.Command) {
 	credAlias, _ := cmd.Flags().GetString("use-password")
 
 	if name == "" || user == "" || host == "" {
-		fmt.Println("Error: --name, --user, and --host are required for non-interactive mode.")
+		fmt.Println(i18n.T("add.error.name.user.host.required"))
 		os.Exit(1)
 	}
 	if keyPath != "" && credAlias != "" {
-		fmt.Println("Error: --key and --use-password flags cannot be used together.")
+		fmt.Println(i18n.T("add.error.key.password.together"))
 		os.Exit(1)
 	}
 
 	if credAlias != "" && !credentialAliasExists(credAlias) {
-		fmt.Printf("Error: credential with alias '%s' not found. Use 'gossh password add %s' to create it.\n", credAlias, credAlias)
+		fmt.Println(i18n.TWith("add.error.credential.not.found", map[string]interface{}{"Alias": credAlias}))
 		os.Exit(1)
 	}
 
@@ -58,33 +59,33 @@ func runFlagBasedAdd(cmd *cobra.Command) {
 	}
 
 	if err := config.AddConnection(conn); err != nil {
-		fmt.Println("Error adding connection:", err)
+		fmt.Println(i18n.TWith("add.error.adding.connection", map[string]interface{}{"Error": err}))
 		os.Exit(1)
 	}
-	fmt.Printf("Connection '%s' added successfully.\n", name)
+	fmt.Println(i18n.TWith("add.success", map[string]interface{}{"Name": name}))
 }
 
 func runInteractiveAdd() {
 	reader := bufio.NewReader(os.Stdin)
 	conn := config.Connection{}
 
-	fmt.Print("Enter connection name: ")
+	fmt.Print(i18n.T("add.enter.name"))
 	conn.Name, _ = reader.ReadString('\n')
 	conn.Name = strings.TrimSpace(conn.Name)
 
-	fmt.Print("Enter group (optional): ")
+	fmt.Print(i18n.T("add.enter.group"))
 	conn.Group, _ = reader.ReadString('\n')
 	conn.Group = strings.TrimSpace(conn.Group)
 
-	fmt.Print("Enter username: ")
+	fmt.Print(i18n.T("add.enter.username"))
 	conn.User, _ = reader.ReadString('\n')
 	conn.User = strings.TrimSpace(conn.User)
 
-	fmt.Print("Enter host address: ")
+	fmt.Print(i18n.T("add.enter.host"))
 	conn.Host, _ = reader.ReadString('\n')
 	conn.Host = strings.TrimSpace(conn.Host)
 
-	fmt.Print("Enter port (default 22): ")
+	fmt.Print(i18n.T("add.enter.port"))
 	portStr, _ := reader.ReadString('\n')
 	portStr = strings.TrimSpace(portStr)
 	if portStr == "" {
@@ -92,51 +93,50 @@ func runInteractiveAdd() {
 	} else {
 		port, err := strconv.Atoi(portStr)
 		if err != nil {
-			fmt.Println("Invalid port number.")
+			fmt.Println(i18n.T("add.invalid.port"))
 			os.Exit(1)
 		}
 		conn.Port = port
 	}
 
-	fmt.Print("Authentication method (key, password, none): ")
+	fmt.Print(i18n.T("add.enter.auth.method"))
 	authMethod, _ := reader.ReadString('\n')
 	authMethod = strings.TrimSpace(strings.ToLower(authMethod))
 
 	switch authMethod {
 	case "key":
-		fmt.Print("Enter path to private key: ")
+		fmt.Print(i18n.T("add.enter.key.path"))
 		conn.KeyPath, _ = reader.ReadString('\n')
 		conn.KeyPath = strings.TrimSpace(conn.KeyPath)
 	case "password":
 		creds, err := config.LoadCredentials()
 		if err != nil || len(creds) == 0 {
-			fmt.Println("No saved password credentials found. Please add one first using 'gossh password add <alias>'.")
+			fmt.Println(i18n.T("add.no.password.credentails"))
 			os.Exit(1)
 		}
-		fmt.Println("Available password aliases:")
+		fmt.Println(i18n.T("add.available.password.aliases"))
 		for i, c := range creds {
 			fmt.Printf("%d: %s\n", i+1, c.Alias)
 		}
-		fmt.Print("Choose a password alias: ")
+		fmt.Print(i18n.T("add.choose.password.alias"))
 		aliasChoice, _ := reader.ReadString('\n')
 		aliasChoice = strings.TrimSpace(aliasChoice)
 		aliasIndex, err := strconv.Atoi(aliasChoice)
 		if err != nil || aliasIndex < 1 || aliasIndex > len(creds) {
-			fmt.Println("Invalid selection.")
+			fmt.Println(i18n.T("add.invalid.selection"))
 			os.Exit(1)
 		}
 		conn.CredentialAlias = creds[aliasIndex-1].Alias
 	case "none":
-		// Do nothing, will use interactive password prompt on connect
 	default:
-		fmt.Println("Invalid authentication method. Assuming 'none'.")
+		fmt.Println(i18n.T("add.invalid.auth.method"))
 	}
 
 	if err := config.AddConnection(conn); err != nil {
-		fmt.Println("Error adding connection:", err)
+		fmt.Println(i18n.TWith("add.error.adding.connection", map[string]interface{}{"Error": err}))
 		os.Exit(1)
 	}
-	fmt.Printf("Connection '%s' added successfully.\n", conn.Name)
+	fmt.Println(i18n.TWith("add.success", map[string]interface{}{"Name": conn.Name}))
 }
 
 func credentialAliasExists(alias string) bool {

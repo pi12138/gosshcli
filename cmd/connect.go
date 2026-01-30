@@ -2,17 +2,14 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"gossh/internal/i18n"
 )
 
 var connectCmd = &cobra.Command{
 	Use:   "connect [name]",
-	Short: "Establish a remote ssh connection to a saved configuration",
+	Short: i18n.T("connect.short"),
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		connectByName(args[0])
 	},
-}
-
-func init() {
-	rootCmd.AddCommand(connectCmd)
 }

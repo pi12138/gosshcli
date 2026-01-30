@@ -1,0 +1,514 @@
+[
+  {
+    "id": "root.short",
+    "translation": "gossh 是一个用 Go 实现的 SSH 客户端"
+  },
+  {
+    "id": "root.help",
+    "translation": "关于任何命令的帮助"
+  },
+  {
+    "id": "error.loading.connections",
+    "translation": "加载连接时出错: {{.Error}}"
+  },
+  {
+    "id": "error.connection.not.found",
+    "translation": "错误: 未找到连接 '{{.Name}}'"
+  },
+  {
+    "id": "config.short",
+    "translation": "管理连接配置"
+  },
+  {
+    "id": "add.short",
+    "translation": "添加新的连接配置"
+  },
+  {
+    "id": "add.error.name.user.host.required",
+    "translation": "错误: 非交互模式下需要 --name、--user 和 --host 参数。"
+  },
+  {
+    "id": "add.error.key.password.together",
+    "translation": "错误: --key 和 --use-password 参数不能同时使用。"
+  },
+  {
+    "id": "add.error.credential.not.found",
+    "translation": "错误: 未找到别名为 '{{.Alias}}' 的凭据。请使用 'gossh password add {{.Alias}}' 创建它。"
+  },
+  {
+    "id": "add.error.adding.connection",
+    "translation": "添加连接时出错: {{.Error}}"
+  },
+  {
+    "id": "add.success",
+    "translation": "连接 '{{.Name}}' 添加成功。"
+  },
+  {
+    "id": "add.enter.name",
+    "translation": "输入连接名称: "
+  },
+  {
+    "id": "add.enter.group",
+    "translation": "输入组（可选）: "
+  },
+  {
+    "id": "add.enter.username",
+    "translation": "输入用户名: "
+  },
+  {
+    "id": "add.enter.host",
+    "translation": "输入主机地址: "
+  },
+  {
+    "id": "add.enter.port",
+    "translation": "输入端口（默认 22）: "
+  },
+  {
+    "id": "add.invalid.port",
+    "translation": "无效的端口号。"
+  },
+  {
+    "id": "add.enter.auth.method",
+    "translation": "认证方式（key, password, none）: "
+  },
+  {
+    "id": "add.enter.key.path",
+    "translation": "输入私钥路径: "
+  },
+  {
+    "id": "add.no.password.credentails",
+    "translation": "未找到已保存的密码凭据。请先使用 'gossh password add <alias>' 添加一个。"
+  },
+  {
+    "id": "add.available.password.aliases",
+    "translation": "可用的密码别名:"
+  },
+  {
+    "id": "add.choose.password.alias",
+    "translation": "选择一个密码别名: "
+  },
+  {
+    "id": "add.invalid.selection",
+    "translation": "无效的选择。"
+  },
+  {
+    "id": "add.invalid.auth.method",
+    "translation": "无效的认证方式。将使用 'none'。"
+  },
+  {
+    "id": "list.short",
+    "translation": "列出本地连接配置"
+  },
+  {
+    "id": "list.no.connections",
+    "translation": "未配置任何连接。使用 'gossh add' 创建一个。"
+  },
+  {
+    "id": "list.no.connections.group",
+    "translation": "在组 '{{.Group}}' 中未找到连接。"
+  },
+  {
+    "id": "list.no.connections.found",
+    "translation": "未找到连接。"
+  },
+  {
+    "id": "list.group",
+    "translation": "组: {{.Group}}"
+  },
+  {
+    "id": "list.ungrouped",
+    "translation": "未分组:"
+  },
+  {
+    "id": "list.connection.info",
+    "translation": "{{.Indent}}- {{.Name}} ({{.User}}@{{.Host}}:{{.Port}}) (认证方式: {{.AuthMethod}})"
+  },
+  {
+    "id": "remove.short",
+    "translation": "删除连接配置"
+  },
+  {
+    "id": "remove.error.removing",
+    "translation": "删除连接时出错: {{.Error}}"
+  },
+  {
+    "id": "remove.success",
+    "translation": "连接 '{{.Name}}' 删除成功。"
+  },
+  {
+    "id": "connect.short",
+    "translation": "建立到已保存配置的远程 SSH 连接"
+  },
+  {
+    "id": "password.short",
+    "translation": "管理已保存的密码"
+  },
+  {
+    "id": "password.add.short",
+    "translation": "使用别名添加新密码"
+  },
+  {
+    "id": "password.enter.password",
+    "translation": "输入密码: "
+  },
+  {
+    "id": "password.error.reading",
+    "translation": "\n读取密码失败: {{.Error}}"
+  },
+  {
+    "id": "password.error.adding",
+    "translation": "添加凭据时出错: {{.Error}}"
+  },
+  {
+    "id": "password.add.success",
+    "translation": "凭据 '{{.Alias}}' 添加成功。"
+  },
+  {
+    "id": "password.list.short",
+    "translation": "列出已保存的密码别名"
+  },
+  {
+    "id": "password.list.error",
+    "translation": "加载凭据时出错: {{.Error}}"
+  },
+  {
+    "id": "password.list.none",
+    "translation": "未保存任何凭据。"
+  },
+  {
+    "id": "password.list.aliases",
+    "translation": "已保存的凭据别名:"
+  },
+  {
+    "id": "password.remove.short",
+    "translation": "删除已保存的密码"
+  },
+  {
+    "id": "password.remove.error",
+    "translation": "删除凭据时出错: {{.Error}}"
+  },
+  {
+    "id": "password.remove.success",
+    "translation": "凭据 '{{.Alias}}' 删除成功。"
+  },
+  {
+    "id": "exec.short",
+    "translation": "在远程服务器上执行命令"
+  },
+  {
+    "id": "exec.long",
+    "translation": "在远程服务器上执行命令，而不启动交互式会话。命令应作为单个字符串参数提供。"
+  },
+  {
+    "id": "scp.short",
+    "translation": "在本地和远程主机之间复制文件（安全复制协议）"
+  },
+  {
+    "id": "scp.long",
+    "translation": "使用 SFTP 在本地和远程主机之间复制文件或目录。\n\n用法:\n  - 上传:   gossh scp <本地路径> <连接名称>:<远程路径>\n  - 下载: gossh scp <连接名称>:<远程路径> <本地路径>\n\n使用 -r 标志递归复制目录。\n\n示例:\n  gossh scp /local/file.txt myserver:/remote/path/\n  gossh scp myserver:/remote/file.txt /local/path/\n  gossh scp -r /local/directory myserver:/remote/path/\n  gossh scp -r myserver:/remote/directory /local/path/"
+  },
+  {
+    "id": "scp.error.both.paths",
+    "translation": "错误: 请同时提供源路径和目标路径。"
+  },
+  {
+    "id": "scp.error.both.remote",
+    "translation": "错误: 无法在两个远程位置之间复制。"
+  },
+  {
+    "id": "scp.error.no.remote",
+    "translation": "错误: 至少有一个路径必须是远程的（格式: 连接名称:路径）。"
+  },
+  {
+    "id": "scp.error.invalid.format",
+    "translation": "错误: 无效的远程路径格式。请使用 连接名称:路径"
+  },
+  {
+    "id": "scp.downloading",
+    "translation": "正在从 {{.User}}@{{.Host}}:{{.Path}} 下载到 {{.Local}}..."
+  },
+  {
+    "id": "scp.uploading",
+    "translation": "正在从 {{.Local}} 上传到 {{.User}}@{{.Host}}:{{.Path}}..."
+  },
+  {
+    "id": "scp.download.success",
+    "translation": "下载完成。"
+  },
+  {
+    "id": "scp.upload.success",
+    "translation": "上传完成。"
+  },
+  {
+    "id": "test.short",
+    "translation": "测试连接配置"
+  },
+  {
+    "id": "test.long",
+    "translation": "通过尝试建立 SSH 连接来测试已保存的连接配置。它进行身份验证，然后立即断开连接，报告成功或失败。"
+  },
+  {
+    "id": "test.failed",
+    "translation": "连接 '{{.Name}}' 测试失败: {{.Error}}"
+  },
+  {
+    "id": "test.success",
+    "translation": "连接 '{{.Name}}' 测试成功!"
+  },
+  {
+    "id": "groups.short",
+    "translation": "列出所有唯一的连接组名称"
+  },
+  {
+    "id": "groups.none",
+    "translation": "未找到组。"
+  },
+  {
+    "id": "groups.available",
+    "translation": "可用的组:"
+  },
+  {
+    "id": "import.short",
+    "translation": "从文件导入连接和凭据"
+  },
+  {
+    "id": "import.long",
+    "translation": "从由 'gossh config export' 创建的 JSON 文件导入配置。这将覆盖您现有的配置。"
+  },
+  {
+    "id": "import.error.reading.file",
+    "translation": "读取导入文件 '{{.File}}' 时出错: {{.Error}}"
+  },
+  {
+    "id": "import.error.parsing.json",
+    "translation": "从导入文件解析 JSON 时出错: {{.Error}}"
+  },
+  {
+    "id": "import.confirm",
+    "translation": "您即将导入 {{.Connections}} 个连接和 {{.Credentials}} 个凭据。"
+  },
+  {
+    "id": "import.warning",
+    "translation": "这将覆盖您当前的配置。"
+  },
+  {
+    "id": "import.confirm.prompt",
+    "translation": "确定要继续吗？(y/N): "
+  },
+  {
+    "id": "import.cancelled",
+    "translation": "导入已取消。"
+  },
+  {
+    "id": "import.error.saving.connections",
+    "translation": "保存导入的连接时出错: {{.Error}}"
+  },
+  {
+    "id": "import.error.saving.credentials",
+    "translation": "保存导入的凭据时出错: {{.Error}}"
+  },
+  {
+    "id": "import.success",
+    "translation": "配置导入成功。"
+  },
+  {
+    "id": "export.short",
+    "translation": "将连接和凭据导出到标准输出"
+  },
+  {
+    "id": "export.long",
+    "translation": "将所有已保存的连接配置和加密凭据导出到单个 JSON 对象并打印到标准输出。您可以将此输出重定向到文件进行备份。示例: gossh config export > gossh_backup.json"
+  },
+  {
+    "id": "export.error.loading.connections",
+    "translation": "加载连接时出错: {{.Error}}"
+  },
+  {
+    "id": "export.error.loading.credentials",
+    "translation": "加载凭据时出错: {{.Error}}"
+  },
+  {
+    "id": "export.error.creating.json",
+    "translation": "创建导出的 JSON 数据时出错: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.reading.key",
+    "translation": "无法读取私钥: {{.Error}}"
+  },
+  {
+    "id": "ssh.enter.passphrase",
+    "translation": "输入密钥的密码: "
+  },
+  {
+    "id": "ssh.error.reading.passphrase",
+    "translation": "读取密码失败: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.parsing.key",
+    "translation": "无法使用密码解析私钥: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.loading.credentials",
+    "translation": "加载凭据时出错: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.password.not.found",
+    "translation": "找不到别名为 '{{.Alias}}' 的密码"
+  },
+  {
+    "id": "ssh.enter.password",
+    "translation": "输入密码: "
+  },
+  {
+    "id": "ssh.error.reading.password",
+    "translation": "读取密码失败: {{.Error}}"
+  },
+  {
+    "id": "ssh.connecting",
+    "translation": "正在连接到 {{.User}}@{{.Host}}:{{.Port}}..."
+  },
+  {
+    "id": "ssh.error.dialing",
+    "translation": "拨号失败: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.session",
+    "translation": "创建会话失败: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.raw.terminal",
+    "translation": "使终端原始化失败: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.pty",
+    "translation": "请求 PTY 失败: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.shell",
+    "translation": "启动 shell 失败: {{.Error}}"
+  },
+  {
+    "id": "ssh.executing.command",
+    "translation": "正在执行命令: {{.Command}}"
+  },
+  {
+    "id": "ssh.error.running.command",
+    "translation": "运行命令失败: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.sftp.client",
+    "translation": "创建 SFTP 客户端失败: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.stat.local",
+    "translation": "获取本地路径信息失败: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.directory.recursive",
+    "translation": "'{{.Path}}' 是目录，请使用 -r 标志进行递归复制"
+  },
+  {
+    "id": "ssh.error.open.local.file",
+    "translation": "打开本地文件失败: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.get.file.info",
+    "translation": "获取文件信息失败: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.remote.exists",
+    "translation": "远程文件 '{{.Path}}' 已存在。使用 -f 标志强制覆盖"
+  },
+  {
+    "id": "ssh.error.create.remote.file",
+    "translation": "创建远程文件失败: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.copying.file",
+    "translation": "复制文件失败: {{.Error}}"
+  },
+  {
+    "id": "ssh.uploaded",
+    "translation": "已上传: {{.Local}} -> {{.Remote}} ({{.Bytes}} 字节)"
+  },
+  {
+    "id": "ssh.error.create.remote.dir",
+    "translation": "创建远程目录失败: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.read.local.dir",
+    "translation": "读取本地目录失败: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.stat.remote",
+    "translation": "获取远程路径信息失败: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.local.exists",
+    "translation": "本地文件 '{{.Path}}' 已存在。使用 -f 标志强制覆盖"
+  },
+  {
+    "id": "ssh.error.create.local.file",
+    "translation": "创建本地文件失败: {{.Error}}"
+  },
+  {
+    "id": "ssh.downloaded",
+    "translation": "已下载: {{.Remote}} -> {{.Local}} ({{.Bytes}} 字节)"
+  },
+  {
+    "id": "ssh.error.create.local.dir",
+    "translation": "创建本地目录失败: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.read.remote.dir",
+    "translation": "读取远程目录失败: {{.Error}}"
+  },
+  {
+    "id": "copy.short",
+    "translation": "将本地公钥复制到远程服务器（类似 ssh-copy-id）"
+  },
+  {
+    "id": "copy.long",
+    "translation": "将本地公钥复制到远程服务器的 authorized_keys 文件中。\n\n默认情况下，它以类似于 ssh-copy-id 的模式运行，接受 user@host 参数。\n系统会提示您输入密码。\n\n或者，您可以使用 --name 参数使用已配置的连接名称。"
+  },
+  {
+    "id": "copy.error.args.with.name",
+    "translation": "错误：使用 --name 参数时不要提供 user@host 参数。"
+  },
+  {
+    "id": "copy.error.no.args",
+    "translation": "错误：请以 user@host 格式提供目标或使用 --name 参数。"
+  },
+  {
+    "id": "copy.error.invalid.format",
+    "translation": "错误：格式无效。请使用 user@host 格式。"
+  },
+  {
+    "id": "copy.error.reading.key",
+    "translation": "从 {{.Path}} 读取公钥时出错: {{.Error}}"
+  },
+  {
+    "id": "copy.attempting",
+    "translation": "正在尝试将公钥复制到 {{.User}}@{{.Host}}..."
+  },
+  {
+    "id": "copy.failed",
+    "translation": "复制公钥失败。"
+  },
+  {
+    "id": "copy.success",
+    "translation": "公钥复制成功。现在您应该可以无需密码进行连接了。"
+  },
+  {
+    "id": "copy.flag.name",
+    "translation": "使用已配置的连接名称"
+  },
+  {
+    "id": "copy.flag.port",
+    "translation": "user@host 模式的端口号"
+  },
+  {
+    "id": "copy.flag.pubkey",
+    "translation": "公钥文件路径"
+  }
+]

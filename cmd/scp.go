@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"gossh/config"
-	"gossh/ssh"
+	"gossh/internal/config"
+	"gossh/internal/i18n"
+	"gossh/internal/ssh"
 	"os"
 	"strings"
 
@@ -12,32 +13,19 @@ import (
 
 var scpCmd = &cobra.Command{
 	Use:   "scp [source] [destination]",
-	Short: "Copy files between local and remote hosts (secure copy protocol)",
-	Long: `Copy files or directories between local and remote hosts using SFTP.
-
-Usage:
-  - Upload:   gossh scp <local-path> <connection-name>:<remote-path>
-  - Download: gossh scp <connection-name>:<remote-path> <local-path>
-
-Use the -r flag to copy directories recursively.
-
-Examples:
-  gossh scp /local/file.txt myserver:/remote/path/
-  gossh scp myserver:/remote/file.txt /local/path/
-  gossh scp -r /local/directory myserver:/remote/path/
-  gossh scp -r myserver:/remote/directory /local/path/`,
-	Run: runScp,
+	Short: i18n.T("scp.short"),
+	Long:  i18n.T("scp.long"),
+	Run:   runScp,
 }
 
 func init() {
 	scpCmd.Flags().BoolP("recursive", "r", false, "Copy directories recursively")
 	scpCmd.Flags().BoolP("force", "f", false, "Force overwrite of existing files")
-	rootCmd.AddCommand(scpCmd)
 }
 
 func runScp(cmd *cobra.Command, args []string) {
 	if len(args) != 2 {
-		fmt.Println("Error: Please provide both source and destination.")
+		fmt.Println(i18n.T("scp.error.both.paths"))
 		_ = cmd.Help()
 		os.Exit(1)
 	}
@@ -47,32 +35,29 @@ func runScp(cmd *cobra.Command, args []string) {
 	source := args[0]
 	destination := args[1]
 
-	// Determine if this is an upload or download operation
-	// Check if source contains ':'
 	sourceHasColon := strings.Contains(source, ":")
 	destHasColon := strings.Contains(destination, ":")
 
 	if sourceHasColon && destHasColon {
-		fmt.Println("Error: Cannot copy between two remote locations.")
+		fmt.Println(i18n.T("scp.error.both.remote"))
 		os.Exit(1)
 	}
 
 	if !sourceHasColon && !destHasColon {
-		fmt.Println("Error: At least one path must be remote (format: connection-name:path).")
+		fmt.Println(i18n.T("scp.error.no.remote"))
 		os.Exit(1)
 	}
 
 	connections, err := config.LoadConnections()
 	if err != nil {
-		fmt.Println("Error loading connections:", err)
+		fmt.Println(i18n.TWith("error.loading.connections", map[string]interface{}{"Error": err}))
 		os.Exit(1)
 	}
 
 	if sourceHasColon {
-		// Download: remote -> local
 		parts := strings.SplitN(source, ":", 2)
 		if len(parts) != 2 {
-			fmt.Println("Error: Invalid remote path format. Use connection-name:path")
+			fmt.Println(i18n.T("scp.error.invalid.format"))
 			os.Exit(1)
 		}
 		connName := parts[0]
@@ -81,22 +66,26 @@ func runScp(cmd *cobra.Command, args []string) {
 
 		conn := findConnection(connections, connName)
 		if conn == nil {
-			fmt.Printf("Error: connection '%s' not found\n", connName)
+			fmt.Println(i18n.TWith("error.connection.not.found", map[string]interface{}{"Name": connName}))
 			os.Exit(1)
 		}
 
-		fmt.Printf("Downloading from %s@%s:%s to %s...\n", conn.User, conn.Host, remotePath, localPath)
+		fmt.Println(i18n.TWith("scp.downloading", map[string]interface{}{
+			"User":  conn.User,
+			"Host":  conn.Host,
+			"Path":  remotePath,
+			"Local": localPath,
+		}))
 		err = ssh.DownloadFileWithOpts(conn, remotePath, localPath, recursive, force)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Println("Download completed successfully.")
+		fmt.Println(i18n.T("scp.download.success"))
 	} else {
-		// Upload: local -> remote
 		parts := strings.SplitN(destination, ":", 2)
 		if len(parts) != 2 {
-			fmt.Println("Error: Invalid remote path format. Use connection-name:path")
+			fmt.Println(i18n.T("scp.error.invalid.format"))
 			os.Exit(1)
 		}
 		connName := parts[0]
@@ -105,17 +94,22 @@ func runScp(cmd *cobra.Command, args []string) {
 
 		conn := findConnection(connections, connName)
 		if conn == nil {
-			fmt.Printf("Error: connection '%s' not found\n", connName)
+			fmt.Println(i18n.TWith("error.connection.not.found", map[string]interface{}{"Name": connName}))
 			os.Exit(1)
 		}
 
-		fmt.Printf("Uploading from %s to %s@%s:%s...\n", localPath, conn.User, conn.Host, remotePath)
+		fmt.Println(i18n.TWith("scp.uploading", map[string]interface{}{
+			"Local": localPath,
+			"User":  conn.User,
+			"Host":  conn.Host,
+			"Path":  remotePath,
+		}))
 		err = ssh.UploadFileWithOpts(conn, localPath, remotePath, recursive, force)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Println("Upload completed successfully.")
+		fmt.Println(i18n.T("scp.upload.success"))
 	}
 }
 
