@@ -1,0 +1,514 @@
+[
+  {
+    "id": "root.short",
+    "translation": "gossh is a ssh client implemented in Go"
+  },
+  {
+    "id": "root.help",
+    "translation": "Help about any command"
+  },
+  {
+    "id": "error.loading.connections",
+    "translation": "Error loading connections: {{.Error}}"
+  },
+  {
+    "id": "error.connection.not.found",
+    "translation": "Error: connection '{{.Name}}' not found"
+  },
+  {
+    "id": "config.short",
+    "translation": "Manage connection configurations"
+  },
+  {
+    "id": "add.short",
+    "translation": "Add a new connection configuration"
+  },
+  {
+    "id": "add.error.name.user.host.required",
+    "translation": "Error: --name, --user, and --host are required for non-interactive mode."
+  },
+  {
+    "id": "add.error.key.password.together",
+    "translation": "Error: --key and --use-password flags cannot be used together."
+  },
+  {
+    "id": "add.error.credential.not.found",
+    "translation": "Error: credential with alias '{{.Alias}}' not found. Use 'gossh password add {{.Alias}}' to create it."
+  },
+  {
+    "id": "add.error.adding.connection",
+    "translation": "Error adding connection: {{.Error}}"
+  },
+  {
+    "id": "add.success",
+    "translation": "Connection '{{.Name}}' added successfully."
+  },
+  {
+    "id": "add.enter.name",
+    "translation": "Enter connection name: "
+  },
+  {
+    "id": "add.enter.group",
+    "translation": "Enter group (optional): "
+  },
+  {
+    "id": "add.enter.username",
+    "translation": "Enter username: "
+  },
+  {
+    "id": "add.enter.host",
+    "translation": "Enter host address: "
+  },
+  {
+    "id": "add.enter.port",
+    "translation": "Enter port (default 22): "
+  },
+  {
+    "id": "add.invalid.port",
+    "translation": "Invalid port number."
+  },
+  {
+    "id": "add.enter.auth.method",
+    "translation": "Authentication method (key, password, none): "
+  },
+  {
+    "id": "add.enter.key.path",
+    "translation": "Enter path to private key: "
+  },
+  {
+    "id": "add.no.password.credentails",
+    "translation": "No saved password credentials found. Please add one first using 'gossh password add <alias>'."
+  },
+  {
+    "id": "add.available.password.aliases",
+    "translation": "Available password aliases:"
+  },
+  {
+    "id": "add.choose.password.alias",
+    "translation": "Choose a password alias: "
+  },
+  {
+    "id": "add.invalid.selection",
+    "translation": "Invalid selection."
+  },
+  {
+    "id": "add.invalid.auth.method",
+    "translation": "Invalid authentication method. Assuming 'none'."
+  },
+  {
+    "id": "list.short",
+    "translation": "List local connection configurations"
+  },
+  {
+    "id": "list.no.connections",
+    "translation": "No connections configured. Use 'gossh add' to create one."
+  },
+  {
+    "id": "list.no.connections.group",
+    "translation": "No connections found in group '{{.Group}}'."
+  },
+  {
+    "id": "list.no.connections.found",
+    "translation": "No connections found."
+  },
+  {
+    "id": "list.group",
+    "translation": "Group: {{.Group}}"
+  },
+  {
+    "id": "list.ungrouped",
+    "translation": "Ungrouped:"
+  },
+  {
+    "id": "list.connection.info",
+    "translation": "{{.Indent}}- {{.Name}} ({{.User}}@{{.Host}}:{{.Port}}) (auth: {{.AuthMethod}})"
+  },
+  {
+    "id": "remove.short",
+    "translation": "Remove a connection configuration"
+  },
+  {
+    "id": "remove.error.removing",
+    "translation": "Error removing connection: {{.Error}}"
+  },
+  {
+    "id": "remove.success",
+    "translation": "Connection '{{.Name}}' removed successfully."
+  },
+  {
+    "id": "connect.short",
+    "translation": "Establish a remote ssh connection to a saved configuration"
+  },
+  {
+    "id": "password.short",
+    "translation": "Manage saved passwords"
+  },
+  {
+    "id": "password.add.short",
+    "translation": "Add a new password with an alias"
+  },
+  {
+    "id": "password.enter.password",
+    "translation": "Enter password: "
+  },
+  {
+    "id": "password.error.reading",
+    "translation": "\nFailed to read password: {{.Error}}"
+  },
+  {
+    "id": "password.error.adding",
+    "translation": "Error adding credential: {{.Error}}"
+  },
+  {
+    "id": "password.add.success",
+    "translation": "Credential '{{.Alias}}' added successfully."
+  },
+  {
+    "id": "password.list.short",
+    "translation": "List saved password aliases"
+  },
+  {
+    "id": "password.list.error",
+    "translation": "Error loading credentials: {{.Error}}"
+  },
+  {
+    "id": "password.list.none",
+    "translation": "No credentials saved."
+  },
+  {
+    "id": "password.list.aliases",
+    "translation": "Saved credential aliases:"
+  },
+  {
+    "id": "password.remove.short",
+    "translation": "Remove a saved password"
+  },
+  {
+    "id": "password.remove.error",
+    "translation": "Error removing credential: {{.Error}}"
+  },
+  {
+    "id": "password.remove.success",
+    "translation": "Credential '{{.Alias}}' removed successfully."
+  },
+  {
+    "id": "exec.short",
+    "translation": "Execute a command on a remote server"
+  },
+  {
+    "id": "exec.long",
+    "translation": "Execute a command on a remote server without starting an interactive session. The command should be provided as a single string argument."
+  },
+  {
+    "id": "scp.short",
+    "translation": "Copy files between local and remote hosts (secure copy protocol)"
+  },
+  {
+    "id": "scp.long",
+    "translation": "Copy files or directories between local and remote hosts using SFTP.\n\nUsage:\n  - Upload:   gossh scp <local-path> <connection-name>:<remote-path>\n  - Download: gossh scp <connection-name>:<remote-path> <local-path>\n\nUse the -r flag to copy directories recursively.\n\nExamples:\n  gossh scp /local/file.txt myserver:/remote/path/\n  gossh scp myserver:/remote/file.txt /local/path/\n  gossh scp -r /local/directory myserver:/remote/path/\n  gossh scp -r myserver:/remote/directory /local/path/"
+  },
+  {
+    "id": "scp.error.both.paths",
+    "translation": "Error: Please provide both source and destination."
+  },
+  {
+    "id": "scp.error.both.remote",
+    "translation": "Error: Cannot copy between two remote locations."
+  },
+  {
+    "id": "scp.error.no.remote",
+    "translation": "Error: At least one path must be remote (format: connection-name:path)."
+  },
+  {
+    "id": "scp.error.invalid.format",
+    "translation": "Error: Invalid remote path format. Use connection-name:path"
+  },
+  {
+    "id": "scp.downloading",
+    "translation": "Downloading from {{.User}}@{{.Host}}:{{.Path}} to {{.Local}}..."
+  },
+  {
+    "id": "scp.uploading",
+    "translation": "Uploading from {{.Local}} to {{.User}}@{{.Host}}:{{.Path}}..."
+  },
+  {
+    "id": "scp.download.success",
+    "translation": "Download completed successfully."
+  },
+  {
+    "id": "scp.upload.success",
+    "translation": "Upload completed successfully."
+  },
+  {
+    "id": "test.short",
+    "translation": "Test a connection configuration"
+  },
+  {
+    "id": "test.long",
+    "translation": "Tests a saved connection configuration by attempting to establish an SSH connection. It authenticates and then immediately disconnects, reporting success or failure."
+  },
+  {
+    "id": "test.failed",
+    "translation": "Connection test for '{{.Name}}' failed: {{.Error}}"
+  },
+  {
+    "id": "test.success",
+    "translation": "Connection test for '{{.Name}}' successful!"
+  },
+  {
+    "id": "groups.short",
+    "translation": "List all unique connection group names"
+  },
+  {
+    "id": "groups.none",
+    "translation": "No groups found."
+  },
+  {
+    "id": "groups.available",
+    "translation": "Available groups:"
+  },
+  {
+    "id": "import.short",
+    "translation": "Import connections and credentials from a file"
+  },
+  {
+    "id": "import.long",
+    "translation": "Imports configurations from a JSON file created by 'gossh config export'. This will overwrite your existing configurations."
+  },
+  {
+    "id": "import.error.reading.file",
+    "translation": "Error reading import file '{{.File}}': {{.Error}}"
+  },
+  {
+    "id": "import.error.parsing.json",
+    "translation": "Error parsing JSON from import file: {{.Error}}"
+  },
+  {
+    "id": "import.confirm",
+    "translation": "You are about to import {{.Connections}} connections and {{.Credentials}} credentials."
+  },
+  {
+    "id": "import.warning",
+    "translation": "This will OVERWRITE your current configurations."
+  },
+  {
+    "id": "import.confirm.prompt",
+    "translation": "Are you sure you want to continue? (y/N): "
+  },
+  {
+    "id": "import.cancelled",
+    "translation": "Import cancelled."
+  },
+  {
+    "id": "import.error.saving.connections",
+    "translation": "Error saving imported connections: {{.Error}}"
+  },
+  {
+    "id": "import.error.saving.credentials",
+    "translation": "Error saving imported credentials: {{.Error}}"
+  },
+  {
+    "id": "import.success",
+    "translation": "Configuration imported successfully."
+  },
+  {
+    "id": "export.short",
+    "translation": "Export your connections and credentials to stdout"
+  },
+  {
+    "id": "export.long",
+    "translation": "Exports all your saved connection configurations and encrypted credentials into a single JSON object printed to standard output. You can redirect this output to a file for backup. Example: gossh config export > gossh_backup.json"
+  },
+  {
+    "id": "export.error.loading.connections",
+    "translation": "Error loading connections: {{.Error}}"
+  },
+  {
+    "id": "export.error.loading.credentials",
+    "translation": "Error loading credentials: {{.Error}}"
+  },
+  {
+    "id": "export.error.creating.json",
+    "translation": "Error creating JSON data for export: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.reading.key",
+    "translation": "unable to read private key: {{.Error}}"
+  },
+  {
+    "id": "ssh.enter.passphrase",
+    "translation": "Enter passphrase for key: "
+  },
+  {
+    "id": "ssh.error.reading.passphrase",
+    "translation": "failed to read passphrase: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.parsing.key",
+    "translation": "unable to parse private key with passphrase: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.loading.credentials",
+    "translation": "error loading credentials: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.password.not.found",
+    "translation": "could not find password for alias '{{.Alias}}'"
+  },
+  {
+    "id": "ssh.enter.password",
+    "translation": "Enter password: "
+  },
+  {
+    "id": "ssh.error.reading.password",
+    "translation": "failed to read password: {{.Error}}"
+  },
+  {
+    "id": "ssh.connecting",
+    "translation": "Connecting to {{.User}}@{{.Host}}:{{.Port}}..."
+  },
+  {
+    "id": "ssh.error.dialing",
+    "translation": "failed to dial: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.session",
+    "translation": "Failed to create session: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.raw.terminal",
+    "translation": "failed to make terminal raw: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.pty",
+    "translation": "request for PTY failed: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.shell",
+    "translation": "failed to start shell: {{.Error}}"
+  },
+  {
+    "id": "ssh.executing.command",
+    "translation": "Executing command: {{.Command}}"
+  },
+  {
+    "id": "ssh.error.running.command",
+    "translation": "failed to run command: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.sftp.client",
+    "translation": "failed to create SFTP client: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.stat.local",
+    "translation": "failed to stat local path: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.directory.recursive",
+    "translation": "'{{.Path}}' is a directory, use -r flag for recursive copy"
+  },
+  {
+    "id": "ssh.error.open.local.file",
+    "translation": "failed to open local file: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.get.file.info",
+    "translation": "failed to get file info: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.remote.exists",
+    "translation": "remote file '{{.Path}}' already exists. Use -f flag to force overwrite"
+  },
+  {
+    "id": "ssh.error.create.remote.file",
+    "translation": "failed to create remote file: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.copying.file",
+    "translation": "failed to copy file: {{.Error}}"
+  },
+  {
+    "id": "ssh.uploaded",
+    "translation": "Uploaded: {{.Local}} -> {{.Remote}} ({{.Bytes}} bytes)"
+  },
+  {
+    "id": "ssh.error.create.remote.dir",
+    "translation": "failed to create remote directory: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.read.local.dir",
+    "translation": "failed to read local directory: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.stat.remote",
+    "translation": "failed to stat remote path: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.local.exists",
+    "translation": "local file '{{.Path}}' already exists. Use -f flag to force overwrite"
+  },
+  {
+    "id": "ssh.error.create.local.file",
+    "translation": "failed to create local file: {{.Error}}"
+  },
+  {
+    "id": "ssh.downloaded",
+    "translation": "Downloaded: {{.Remote}} -> {{.Local}} ({{.Bytes}} bytes)"
+  },
+  {
+    "id": "ssh.error.create.local.dir",
+    "translation": "failed to create local directory: {{.Error}}"
+  },
+  {
+    "id": "ssh.error.read.remote.dir",
+    "translation": "failed to read remote directory: {{.Error}}"
+  },
+  {
+    "id": "copy.short",
+    "translation": "Copy local public key to a remote server (similar to ssh-copy-id)"
+  },
+  {
+    "id": "copy.long",
+    "translation": "Copy a local public key to a remote server's authorized_keys file.\n\nBy default, it operates in a mode similar to ssh-copy-id, taking a user@host argument.\nYou will be prompted for a password.\n\nAlternatively, you can use a pre-configured connection name with the --name flag."
+  },
+  {
+    "id": "copy.error.args.with.name",
+    "translation": "Error: Do not provide a user@host argument when using the --name flag."
+  },
+  {
+    "id": "copy.error.no.args",
+    "translation": "Error: Please provide a target in user@host format or use the --name flag."
+  },
+  {
+    "id": "copy.error.invalid.format",
+    "translation": "Error: Invalid format. Please use user@host."
+  },
+  {
+    "id": "copy.error.reading.key",
+    "translation": "Error reading public key from {{.Path}}: {{.Error}}"
+  },
+  {
+    "id": "copy.attempting",
+    "translation": "Attempting to copy public key to {{.User}}@{{.Host}}..."
+  },
+  {
+    "id": "copy.failed",
+    "translation": "Failed to copy public key."
+  },
+  {
+    "id": "copy.success",
+    "translation": "Public key copied successfully. You should now be able to connect without a password."
+  },
+  {
+    "id": "copy.flag.name",
+    "translation": "Use a pre-configured connection by its name"
+  },
+  {
+    "id": "copy.flag.port",
+    "translation": "Port number for user@host mode"
+  },
+  {
+    "id": "copy.flag.pubkey",
+    "translation": "Path to your public key file"
+  }
+]

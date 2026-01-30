@@ -3,34 +3,34 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"gossh/config"
+	"gossh/internal/config"
+	"gossh/internal/i18n"
 	"os"
 	"sort"
 )
 
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List local connection configurations",
+	Short: i18n.T("list.short"),
 	Run: func(cmd *cobra.Command, args []string) {
 		filterGroup, _ := cmd.Flags().GetString("group")
 
 		connections, err := config.LoadConnections()
 		if err != nil {
-			fmt.Println("Error loading connections:", err)
+			fmt.Println(i18n.TWith("error.loading.connections", map[string]interface{}{"Error": err}))
 			os.Exit(1)
 		}
 
 		if len(connections) == 0 {
-			fmt.Println("No connections configured. Use 'gossh add' to create one.")
+			fmt.Println(i18n.T("list.no.connections"))
 			return
 		}
 
-		// Group connections
 		groups := make(map[string][]config.Connection)
 		var ungrouped []config.Connection
 		for _, c := range connections {
 			if filterGroup != "" && c.Group != filterGroup {
-				continue // Skip if filtering and group doesn't match
+				continue
 			}
 			if c.Group != "" {
 				groups[c.Group] = append(groups[c.Group], c)
@@ -41,16 +41,14 @@ var listCmd = &cobra.Command{
 
 		if len(groups) == 0 && len(ungrouped) == 0 {
 			if filterGroup != "" {
-				fmt.Printf("No connections found in group '%s'.\n", filterGroup)
+				fmt.Println(i18n.TWith("list.no.connections.group", map[string]interface{}{"Group": filterGroup}))
 			} else {
-				fmt.Println("No connections found.")
+				fmt.Println(i18n.T("list.no.connections.found"))
 			}
 			return
 		}
 
-		// Display grouped connections
 		if len(groups) > 0 {
-			// Sort group names for consistent order
 			var groupNames []string
 			for name := range groups {
 				groupNames = append(groupNames, name)
@@ -58,17 +56,16 @@ var listCmd = &cobra.Command{
 			sort.Strings(groupNames)
 
 			for _, groupName := range groupNames {
-				fmt.Printf("Group: %s\n", groupName)
+				fmt.Println(i18n.TWith("list.group", map[string]interface{}{"Group": groupName}))
 				for _, c := range groups[groupName] {
 					printConnectionInfo(c, true)
 				}
 			}
 		}
 
-		// Display ungrouped connections
 		if len(ungrouped) > 0 {
 			if len(groups) > 0 {
-				fmt.Println("\nUngrouped:")
+				fmt.Println("\n" + i18n.T("list.ungrouped"))
 			}
 			for _, c := range ungrouped {
 				printConnectionInfo(c, false)
@@ -88,7 +85,14 @@ func printConnectionInfo(c config.Connection, isGrouped bool) {
 	if isGrouped {
 		indent = "  "
 	}
-	fmt.Printf("%s- %s (%s@%s:%d) (auth: %s)\n", indent, c.Name, c.User, c.Host, c.Port, authMethod)
+	fmt.Println(i18n.TWith("list.connection.info", map[string]interface{}{
+		"Indent":     indent,
+		"Name":       c.Name,
+		"User":       c.User,
+		"Host":       c.Host,
+		"Port":       c.Port,
+		"AuthMethod": authMethod,
+	}))
 }
 
 func init() {

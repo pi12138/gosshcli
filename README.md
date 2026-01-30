@@ -13,6 +13,7 @@
 - **Connection Testing**: Test connectivity and authentication to a server without a full login.
 - **Configuration Portability**: Export all your connections and credentials to a single file for backup or migration, and import them on another machine.
 - **Multiple Authentication Methods**: Supports password, private key (with passphrase), and interactive password authentication.
+- **Internationalization (i18n)**: Supports English (en) and Chinese (zh) languages.
 
 ## Installation
 
@@ -30,6 +31,34 @@
     ```sh
     sudo mv gossh /usr/local/bin/
     ```
+
+## Internationalization (i18n)
+
+gossh automatically detects your system locale and displays messages in your preferred language if supported.
+
+Language files are embedded in the binary, so you only need the `gossh` executable - no additional files are required.
+
+### Setting Language
+
+gossh reads your system locale from `LANG` or `LANGUAGE` environment variables to determine the language to use.
+
+**Example on Linux/macOS:**
+```bash
+# Set system locale to English (United States)
+export LANG=en_US.UTF-8
+gossh config list
+
+# Set system locale to Chinese (Simplified)
+export LANG=zh_CN.UTF-8
+gossh config list
+```
+
+### Supported Languages
+
+- **English** - Automatically used when your system locale is set to English (en, en_US, en_GB, etc.)
+- **Chinese (Simplified)** - Automatically used when your system locale is set to Chinese (zh, zh_CN, zh_Hans, etc.)
+
+If your system locale is not supported, gossh will fall back to English.
 
 ## Usage
 

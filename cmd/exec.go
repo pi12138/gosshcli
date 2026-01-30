@@ -3,25 +3,25 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"gossh/config"
-	"gossh/ssh"
+	"gossh/internal/config"
+	"gossh/internal/i18n"
+	"gossh/internal/ssh"
 	"os"
 	"strings"
 )
 
 var execCmd = &cobra.Command{
 	Use:   "exec <name> <command>",
-	Short: "Execute a command on a remote server",
-	Long: `Execute a command on a remote server without starting an interactive session. 
-The command should be provided as a single string argument.`,
-	Args: cobra.MinimumNArgs(2),
+	Short: i18n.T("exec.short"),
+	Long:  i18n.T("exec.long"),
+	Args:  cobra.MinimumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		connectionName := args[0]
 		command := strings.Join(args[1:], " ")
 
 		connections, err := config.LoadConnections()
 		if err != nil {
-			fmt.Println("Error loading connections:", err)
+			fmt.Println(i18n.TWith("error.loading.connections", map[string]interface{}{"Error": err}))
 			os.Exit(1)
 		}
 
@@ -34,17 +34,12 @@ The command should be provided as a single string argument.`,
 		}
 
 		if conn == nil {
-			fmt.Printf("Error: connection '%s' not found\n", connectionName)
+			fmt.Println(i18n.TWith("error.connection.not.found", map[string]interface{}{"Name": connectionName}))
 			os.Exit(1)
 		}
 
 		if err := ssh.ExecuteRemoteCommand(conn, command); err != nil {
-			// The error is already printed in the ssh package, just exit.
 			os.Exit(1)
 		}
 	},
-}
-
-func init() {
-	rootCmd.AddCommand(execCmd)
 }
