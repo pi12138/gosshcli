@@ -3,9 +3,9 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"gossh/config"
-	"gossh/ssh"
-	"io/ioutil"
+	"gossh/internal/config"
+	"gossh/internal/i18n"
+	"gossh/internal/ssh"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,14 +13,9 @@ import (
 
 var copyCmd = &cobra.Command{
 	Use:   "copy [user@host]",
-	Short: "Copy local public key to a remote server (similar to ssh-copy-id)",
-	Long: `Copy a local public key to a remote server's authorized_keys file.
-
-By default, it operates in a mode similar to ssh-copy-id, taking a user@host argument.
-You will be prompted for a password.
-
-Alternatively, you can use a pre-configured connection name with the --name flag.`,
-	Run: runCopy,
+	Short: i18n.T("copy.short"),
+	Long:  i18n.T("copy.long"),
+	Run:   runCopy,
 }
 
 func runCopy(cmd *cobra.Command, args []string) {
@@ -30,14 +25,13 @@ func runCopy(cmd *cobra.Command, args []string) {
 	var conn *config.Connection
 
 	if connName != "" {
-		// --- Connection Name Mode ---
 		if len(args) > 0 {
-			fmt.Println("Error: Do not provide a user@host argument when using the --name flag.")
+			fmt.Println(i18n.T("copy.error.args.with.name"))
 			os.Exit(1)
 		}
 		connections, err := config.LoadConnections()
 		if err != nil {
-			fmt.Println("Error loading connections:", err)
+			fmt.Println(i18n.TWith("error.loading.connections", map[string]interface{}{"Error": err}))
 			os.Exit(1)
 		}
 		for i, c := range connections {
@@ -47,19 +41,18 @@ func runCopy(cmd *cobra.Command, args []string) {
 			}
 		}
 		if conn == nil {
-			fmt.Printf("Error: connection '%s' not found\n", connName)
+			fmt.Println(i18n.TWith("error.connection.not.found", map[string]interface{}{"Name": connName}))
 			os.Exit(1)
 		}
 	} else {
-		// --- User@Host Mode ---
 		if len(args) != 1 {
-			fmt.Println("Error: Please provide the target in user@host format or use the --name flag.")
+			fmt.Println(i18n.T("copy.error.no.args"))
 			_ = cmd.Help()
 			os.Exit(1)
 		}
 		parts := strings.Split(args[0], "@")
 		if len(parts) != 2 {
-			fmt.Println("Error: Invalid format. Please use user@host.")
+			fmt.Println(i18n.T("copy.error.invalid.format"))
 			os.Exit(1)
 		}
 		conn = &config.Connection{
@@ -74,35 +67,33 @@ func runCopy(cmd *cobra.Command, args []string) {
 	if pubKeyPath == "" {
 		home, err := os.UserHomeDir()
 		if err != nil {
-			fmt.Println("Error getting home directory:", err)
+			fmt.Println(i18n.TWith("ssh.error.reading.key", map[string]interface{}{"Error": err}))
 			os.Exit(1)
 		}
 		pubKeyPath = filepath.Join(home, ".ssh", "id_rsa.pub")
 	}
 
-	pubKey, err := ioutil.ReadFile(pubKeyPath)
+	pubKey, err := os.ReadFile(pubKeyPath)
 	if err != nil {
-		fmt.Printf("Error reading public key from %s: %v\n", pubKeyPath, err)
+		fmt.Println(i18n.TWith("copy.error.reading.key", map[string]interface{}{"Path": pubKeyPath, "Error": err}))
 		os.Exit(1)
 	}
 
-	// Command to ensure .ssh directory exists and append the key to authorized_keys
 	remoteCmd := fmt.Sprintf("mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo '%s' >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys", strings.TrimSpace(string(pubKey)))
 
-	fmt.Printf("Attempting to copy public key to %s@%s...\n", conn.User, conn.Host)
-	// We need to force password authentication for this operation.
-	// A temporary connection object is created for this.
+	fmt.Println(i18n.TWith("copy.attempting", map[string]interface{}{"User": conn.User, "Host": conn.Host}))
+
 	tempConn := *conn
-	tempConn.KeyPath = "" // Ensure key auth is not used
-	tempConn.CredentialAlias = "" // Ensure stored password is not used either
+	tempConn.KeyPath = ""
+	tempConn.CredentialAlias = ""
 
 	err = ssh.ExecuteRemoteCommand(&tempConn, remoteCmd)
 	if err != nil {
-		fmt.Println("Failed to copy public key.")
+		fmt.Println(i18n.T("copy.failed"))
 		os.Exit(1)
 	}
 
-	fmt.Println("Public key copied successfully. You should now be able to connect without a password.")
+	fmt.Println(i18n.T("copy.success"))
 }
 
 func init() {
@@ -112,8 +103,7 @@ func init() {
 		defaultPubKeyPath = filepath.Join(home, ".ssh", "id_rsa.pub")
 	}
 
-	copyCmd.Flags().StringP("name", "n", "", "Use a pre-configured connection by its name")
-	copyCmd.Flags().IntP("port", "p", 22, "Port number for user@host mode")
-	copyCmd.Flags().StringP("pubkey", "i", defaultPubKeyPath, "Path to your public key file")
-	rootCmd.AddCommand(copyCmd)
+	copyCmd.Flags().StringP("name", "n", "", i18n.T("copy.flag.name"))
+	copyCmd.Flags().IntP("port", "p", 22, i18n.T("copy.flag.port"))
+	copyCmd.Flags().StringP("pubkey", "i", defaultPubKeyPath, i18n.T("copy.flag.pubkey"))
 }

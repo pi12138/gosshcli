@@ -2,9 +2,9 @@ package ssh
 
 import (
 	"fmt"
-	"gossh/config"
+	"gossh/internal/config"
+	"gossh/internal/i18n"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -19,31 +19,28 @@ func getAuthMethods(conn *config.Connection) ([]ssh.AuthMethod, error) {
 	var authMethods []ssh.AuthMethod
 
 	if conn.KeyPath != "" {
-		// 1. Use private key if available
-		key, err := ioutil.ReadFile(conn.KeyPath)
+		key, err := os.ReadFile(conn.KeyPath)
 		if err != nil {
-			return nil, fmt.Errorf("unable to read private key: %v", err)
+			return nil, i18n.ErrorWith("ssh.error.reading.key", map[string]interface{}{"Error": err}, err)
 		}
 		signer, err := ssh.ParsePrivateKey(key)
 		if err != nil {
-			// Try parsing with a passphrase
-			fmt.Print("Enter passphrase for key: ")
+			fmt.Print(i18n.T("ssh.enter.passphrase"))
 			bytePassword, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 			fmt.Println()
 			if err != nil {
-				return nil, fmt.Errorf("failed to read passphrase: %v", err)
+				return nil, i18n.ErrorWith("ssh.error.reading.passphrase", map[string]interface{}{"Error": err}, err)
 			}
 			signer, err = ssh.ParsePrivateKeyWithPassphrase(key, bytePassword)
 			if err != nil {
-				return nil, fmt.Errorf("unable to parse private key with passphrase: %v", err)
+				return nil, i18n.ErrorWith("ssh.error.parsing.key", map[string]interface{}{"Error": err}, err)
 			}
 		}
 		authMethods = append(authMethods, ssh.PublicKeys(signer))
 	} else if conn.CredentialAlias != "" {
-		// 2. Use password from credential store
 		creds, err := config.LoadCredentials()
 		if err != nil {
-			return nil, fmt.Errorf("error loading credentials: %v", err)
+			return nil, i18n.ErrorWith("ssh.error.loading.credentials", map[string]interface{}{"Error": err}, err)
 		}
 		var foundPassword string
 		for _, c := range creds {
@@ -53,16 +50,15 @@ func getAuthMethods(conn *config.Connection) ([]ssh.AuthMethod, error) {
 			}
 		}
 		if foundPassword == "" {
-			return nil, fmt.Errorf("could not find password for alias '%s'", conn.CredentialAlias)
+			return nil, i18n.ErrorWith("ssh.error.password.not.found", map[string]interface{}{"Alias": conn.CredentialAlias}, fmt.Errorf("password not found"))
 		}
 		authMethods = append(authMethods, ssh.Password(foundPassword))
 	} else {
-		// 3. Fallback to interactive password prompt
-		fmt.Print("Enter password: ")
+		fmt.Print(i18n.T("ssh.enter.password"))
 		bytePassword, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil {
 			fmt.Println()
-			return nil, fmt.Errorf("failed to read password: %v", err)
+			return nil, i18n.ErrorWith("ssh.error.reading.password", map[string]interface{}{"Error": err}, err)
 		}
 		fmt.Println()
 		authMethods = append(authMethods, ssh.Password(string(bytePassword)))
@@ -80,13 +76,17 @@ func newClient(conn *config.Connection) (*ssh.Client, error) {
 	sshConfig := &ssh.ClientConfig{
 		User:            conn.User,
 		Auth:            authMethods,
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(), // Note: In a real-world app, you'd want to verify the host key.
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
-	fmt.Printf("Connecting to %s@%s:%d...\n", conn.User, conn.Host, conn.Port)
+	fmt.Println(i18n.TWith("ssh.connecting", map[string]interface{}{
+		"User": conn.User,
+		"Host": conn.Host,
+		"Port": conn.Port,
+	}))
 	client, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", conn.Host, conn.Port), sshConfig)
 	if err != nil {
-		return nil, fmt.Errorf("failed to dial: %s", err)
+		return nil, i18n.ErrorWith("ssh.error.dialing", map[string]interface{}{"Error": err}, err)
 	}
 	return client, nil
 }
@@ -102,7 +102,7 @@ func Connect(conn *config.Connection) {
 
 	session, err := client.NewSession()
 	if err != nil {
-		fmt.Printf("Failed to create session: %s\n", err)
+		fmt.Println(i18n.TWith("ssh.error.session", map[string]interface{}{"Error": err}))
 		os.Exit(1)
 	}
 	defer session.Close()
@@ -114,7 +114,7 @@ func Connect(conn *config.Connection) {
 	fd := int(os.Stdin.Fd())
 	oldState, err := terminal.MakeRaw(fd)
 	if err != nil {
-		fmt.Printf("failed to make terminal raw: %v\n", err)
+		fmt.Println(i18n.TWith("ssh.error.raw.terminal", map[string]interface{}{"Error": err}))
 		os.Exit(1)
 	}
 	defer terminal.Restore(fd, oldState)
@@ -126,12 +126,12 @@ func Connect(conn *config.Connection) {
 	}
 
 	if err := session.RequestPty("xterm-256color", termHeight, termWidth, ssh.TerminalModes{}); err != nil {
-		fmt.Printf("request for PTY failed: %s\n", err)
+		fmt.Println(i18n.TWith("ssh.error.pty", map[string]interface{}{"Error": err}))
 		os.Exit(1)
 	}
 
 	if err := session.Shell(); err != nil {
-		fmt.Printf("failed to start shell: %s\n", err)
+		fmt.Println(i18n.TWith("ssh.error.shell", map[string]interface{}{"Error": err}))
 		os.Exit(1)
 	}
 
@@ -158,9 +158,9 @@ func ExecuteRemoteCommand(conn *config.Connection, command string) error {
 	session.Stdout = os.Stdout
 	session.Stderr = os.Stderr
 
-	fmt.Printf("Executing command: %s\n", command)
+	fmt.Println(i18n.TWith("ssh.executing.command", map[string]interface{}{"Command": command}))
 	if err := session.Run(command); err != nil {
-		err = fmt.Errorf("failed to run command: %s", err)
+		err = i18n.ErrorWith("ssh.error.running.command", map[string]interface{}{"Error": err}, err)
 		fmt.Println(err)
 		return err
 	}
@@ -193,18 +193,18 @@ func UploadFileWithOpts(conn *config.Connection, localPath, remotePath string, r
 
 	sftpClient, err := sftp.NewClient(client)
 	if err != nil {
-		return fmt.Errorf("failed to create SFTP client: %v", err)
+		return i18n.ErrorWith("ssh.error.sftp.client", map[string]interface{}{"Error": err}, err)
 	}
 	defer sftpClient.Close()
 
 	localInfo, err := os.Stat(localPath)
 	if err != nil {
-		return fmt.Errorf("failed to stat local path: %v", err)
+		return i18n.ErrorWith("ssh.error.stat.local", map[string]interface{}{"Error": err}, err)
 	}
 
 	if localInfo.IsDir() {
 		if !recursive {
-			return fmt.Errorf("'%s' is a directory, use -r flag for recursive copy", localPath)
+			return i18n.ErrorWith("ssh.error.directory.recursive", map[string]interface{}{"Path": localPath}, fmt.Errorf("is directory"))
 		}
 		return uploadDir(sftpClient, localPath, remotePath)
 	}
@@ -221,68 +221,64 @@ func uploadFile(sftpClient *sftp.Client, localPath, remotePath string) error {
 func uploadFileWithOpts(sftpClient *sftp.Client, localPath, remotePath string, force bool) error {
 	srcFile, err := os.Open(localPath)
 	if err != nil {
-		return fmt.Errorf("failed to open local file: %v", err)
+		return i18n.ErrorWith("ssh.error.open.local.file", map[string]interface{}{"Error": err}, err)
 	}
 	defer srcFile.Close()
 
-	// Get file info to determine size for progress bar
 	fileInfo, err := srcFile.Stat()
 	if err != nil {
-		return fmt.Errorf("failed to get file info: %v", err)
+		return i18n.ErrorWith("ssh.error.get.file.info", map[string]interface{}{"Error": err}, err)
 	}
 	fileSize := fileInfo.Size()
 
-	// Check if remote path is a directory
 	remoteInfo, err := sftpClient.Stat(remotePath)
 	if err == nil && remoteInfo.IsDir() {
-		// If remote path is a directory, append filename to it
 		_, localFileName := filepath.Split(localPath)
 		remotePath = filepath.Join(remotePath, localFileName)
 	}
 
-	// Check if remote file already exists
 	remoteInfo, err = sftpClient.Stat(remotePath)
 	if err == nil {
-		// Remote file exists
 		if !force {
-			return fmt.Errorf("remote file '%s' already exists. Use -f flag to force overwrite", remotePath)
+			return i18n.ErrorWith("ssh.error.remote.exists", map[string]interface{}{"Path": remotePath}, fmt.Errorf("file exists"))
 		}
 	}
 
 	dstFile, err := sftpClient.Create(remotePath)
 	if err != nil {
-		return fmt.Errorf("failed to create remote file: %v", err)
+		return i18n.ErrorWith("ssh.error.create.remote.file", map[string]interface{}{"Error": err}, err)
 	}
 	defer dstFile.Close()
 
-	// Create progress bar
 	bar := pb.Full.Start64(fileSize)
 	bar.Set(pb.Bytes, true)
 	barReader := bar.NewProxyReader(srcFile)
 
-	// Copy with progress bar
 	bytes, err := io.Copy(dstFile, barReader)
 	bar.Finish()
 
 	if err != nil {
-		return fmt.Errorf("failed to copy file: %v", err)
+		return i18n.ErrorWith("ssh.error.copying.file", map[string]interface{}{"Error": err}, err)
 	}
 
-	fmt.Printf("Uploaded: %s -> %s (%d bytes)\n", localPath, remotePath, bytes)
+	fmt.Println(i18n.TWith("ssh.uploaded", map[string]interface{}{
+		"Local":  localPath,
+		"Remote": remotePath,
+		"Bytes":  bytes,
+	}))
 	return nil
 }
 
 // uploadDir recursively uploads a directory.
 func uploadDir(sftpClient *sftp.Client, localPath, remotePath string) error {
-	// Create remote directory
 	err := sftpClient.MkdirAll(remotePath)
 	if err != nil {
-		return fmt.Errorf("failed to create remote directory: %v", err)
+		return i18n.ErrorWith("ssh.error.create.remote.dir", map[string]interface{}{"Error": err}, err)
 	}
 
 	entries, err := os.ReadDir(localPath)
 	if err != nil {
-		return fmt.Errorf("failed to read local directory: %v", err)
+		return i18n.ErrorWith("ssh.error.read.local.dir", map[string]interface{}{"Error": err}, err)
 	}
 
 	for _, entry := range entries {
@@ -320,18 +316,18 @@ func DownloadFileWithOpts(conn *config.Connection, remotePath, localPath string,
 
 	sftpClient, err := sftp.NewClient(client)
 	if err != nil {
-		return fmt.Errorf("failed to create SFTP client: %v", err)
+		return i18n.ErrorWith("ssh.error.sftp.client", map[string]interface{}{"Error": err}, err)
 	}
 	defer sftpClient.Close()
 
 	remoteInfo, err := sftpClient.Stat(remotePath)
 	if err != nil {
-		return fmt.Errorf("failed to stat remote path: %v", err)
+		return i18n.ErrorWith("ssh.error.stat.remote", map[string]interface{}{"Error": err}, err)
 	}
 
 	if remoteInfo.IsDir() {
 		if !recursive {
-			return fmt.Errorf("'%s' is a directory, use -r flag for recursive copy", remotePath)
+			return i18n.ErrorWith("ssh.error.directory.recursive", map[string]interface{}{"Path": remotePath}, fmt.Errorf("is directory"))
 		}
 		return downloadDir(sftpClient, remotePath, localPath)
 	}
@@ -348,68 +344,64 @@ func downloadFile(sftpClient *sftp.Client, remotePath, localPath string) error {
 func downloadFileWithOpts(sftpClient *sftp.Client, remotePath, localPath string, force bool) error {
 	srcFile, err := sftpClient.Open(remotePath)
 	if err != nil {
-		return fmt.Errorf("failed to open remote file: %v", err)
+		return i18n.ErrorWith("ssh.error.open.remote.file", map[string]interface{}{"Error": err}, err)
 	}
 	defer srcFile.Close()
 
-	// Get remote file info to determine size for progress bar
 	fileInfo, err := srcFile.Stat()
 	if err != nil {
-		return fmt.Errorf("failed to get remote file info: %v", err)
+		return i18n.ErrorWith("ssh.error.get.file.info", map[string]interface{}{"Error": err}, err)
 	}
 	fileSize := fileInfo.Size()
 
-	// Check if local path is a directory
 	localInfo, err := os.Stat(localPath)
 	if err == nil && localInfo.IsDir() {
-		// If local path is a directory, append filename to it
 		remoteFileName := filepath.Base(remotePath)
 		localPath = filepath.Join(localPath, remoteFileName)
 	}
 
-	// Check if local file already exists
 	localInfo, err = os.Stat(localPath)
 	if err == nil {
-		// Local file exists
 		if !force {
-			return fmt.Errorf("local file '%s' already exists. Use -f flag to force overwrite", localPath)
+			return i18n.ErrorWith("ssh.error.local.exists", map[string]interface{}{"Path": localPath}, fmt.Errorf("file exists"))
 		}
 	}
 
 	dstFile, err := os.Create(localPath)
 	if err != nil {
-		return fmt.Errorf("failed to create local file: %v", err)
+		return i18n.ErrorWith("ssh.error.create.local.file", map[string]interface{}{"Error": err}, err)
 	}
 	defer dstFile.Close()
 
-	// Create progress bar
 	bar := pb.Full.Start64(fileSize)
 	bar.Set(pb.Bytes, true)
 	barReader := bar.NewProxyReader(srcFile)
 
-	// Copy with progress bar
 	bytes, err := io.Copy(dstFile, barReader)
 	bar.Finish()
 
 	if err != nil {
-		return fmt.Errorf("failed to copy file: %v", err)
+		return i18n.ErrorWith("ssh.error.copying.file", map[string]interface{}{"Error": err}, err)
 	}
 
-	fmt.Printf("Downloaded: %s -> %s (%d bytes)\n", remotePath, localPath, bytes)
+	fmt.Println(i18n.TWith("ssh.downloaded", map[string]interface{}{
+		"Remote": remotePath,
+		"Local":  localPath,
+		"Bytes":  bytes,
+	}))
 	return nil
 }
 
 // downloadDir recursively downloads a directory.
 func downloadDir(sftpClient *sftp.Client, remotePath, localPath string) error {
-	// Create local directory
 	err := os.MkdirAll(localPath, 0755)
 	if err != nil {
-		return fmt.Errorf("failed to create local directory: %v", err)
+		return i18n.ErrorWith("ssh.error.create.local.dir", map[string]interface{}{"Error": err}, err)
 	}
 
 	entries, err := sftpClient.ReadDir(remotePath)
 	if err != nil {
-		return fmt.Errorf("failed to read remote directory: %v", err)
+		return i18n.ErrorWith("ssh.error.read.remote.dir", map[string]interface{}{"Error": err}, err)
 	}
 
 	for _, entry := range entries {

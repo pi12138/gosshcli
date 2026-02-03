@@ -3,18 +3,19 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"gossh/config"
+	"gossh/internal/config"
+	"gossh/internal/i18n"
 	"os"
 	"sort"
 )
 
 var groupsCmd = &cobra.Command{
 	Use:   "groups",
-	Short: "List all unique connection group names",
+	Short: i18n.T("groups.short"),
 	Run: func(cmd *cobra.Command, args []string) {
 		connections, err := config.LoadConnections()
 		if err != nil {
-			fmt.Println("Error loading connections:", err)
+			fmt.Println(i18n.TWith("error.loading.connections", map[string]interface{}{"Error": err}))
 			os.Exit(1)
 		}
 
@@ -26,7 +27,7 @@ var groupsCmd = &cobra.Command{
 		}
 
 		if len(groupSet) == 0 {
-			fmt.Println("No groups found.")
+			fmt.Println(i18n.T("groups.none"))
 			return
 		}
 
@@ -36,13 +37,9 @@ var groupsCmd = &cobra.Command{
 		}
 		sort.Strings(groups)
 
-		fmt.Println("Available groups:")
+		fmt.Println(i18n.T("groups.available"))
 		for _, group := range groups {
 			fmt.Printf("- %s\n", group)
 		}
 	},
-}
-
-func init() {
-	rootCmd.AddCommand(groupsCmd)
 }
