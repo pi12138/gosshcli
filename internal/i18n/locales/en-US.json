@@ -448,6 +448,14 @@
     "translation": "local file '{{.Path}}' already exists. Use -f flag to force overwrite"
   },
   {
+    "id": "ssh.error.checking.file",
+    "translation": "failed to check file: {{.Error}}"
+  },
+  {
+    "id": "ssh.file.unchanged",
+    "translation": "Files are identical, skipping transfer: {{.Local}} <-> {{.Remote}}"
+  },
+  {
     "id": "ssh.error.create.local.file",
     "translation": "failed to create local file: {{.Error}}"
   },

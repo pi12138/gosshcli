@@ -448,6 +448,14 @@
     "translation": "本地文件 '{{.Path}}' 已存在。使用 -f 标志强制覆盖"
   },
   {
+    "id": "ssh.error.checking.file",
+    "translation": "检查文件失败: {{.Error}}"
+  },
+  {
+    "id": "ssh.file.unchanged",
+    "translation": "文件相同，跳过传输: {{.Local}} <-> {{.Remote}}"
+  },
+  {
     "id": "ssh.error.create.local.file",
     "translation": "创建本地文件失败: {{.Error}}"
   },

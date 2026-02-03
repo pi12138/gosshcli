@@ -1,18 +1,122 @@
 package ssh
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"gossh/internal/config"
 	"gossh/internal/i18n"
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/cheggaaa/pb/v3"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"
 )
+
+// executeRemoteCommandWithOutput executes a command on the remote server and returns its output.
+func executeRemoteCommandWithOutput(client *ssh.Client, command string) (string, error) {
+	session, err := client.NewSession()
+	if err != nil {
+		return "", fmt.Errorf("failed to create session: %w", err)
+	}
+	defer session.Close()
+
+	output, err := session.CombinedOutput(command)
+	if err != nil {
+		return "", fmt.Errorf("command failed: %w", err)
+	}
+
+	return strings.TrimSpace(string(output)), nil
+}
+
+// getRemoteFileHash tries to get the SHA256 hash of a remote file.
+// First tries to execute sha256sum command, falls back to SFTP if that fails.
+func getRemoteFileHash(client *ssh.Client, remotePath string, sftpClient *sftp.Client) (string, error) {
+	command := fmt.Sprintf("sha256sum %s", remotePath)
+	output, err := executeRemoteCommandWithOutput(client, command)
+	if err == nil {
+		parts := strings.Fields(output)
+		if len(parts) > 0 {
+			return parts[0], nil
+		}
+	}
+
+	hash, err := calculateFileHashViaSFTP(remotePath, sftpClient)
+	if err != nil {
+		return "", fmt.Errorf("failed to get remote file hash: %w", err)
+	}
+
+	return hash, nil
+}
+
+// calculateFileHash calculates the SHA256 hash of a local file.
+func calculateFileHash(filePath string) (string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	hash := sha256.New()
+	if _, err := io.Copy(hash, file); err != nil {
+		return "", err
+	}
+
+	return hex.EncodeToString(hash.Sum(nil)), nil
+}
+
+// calculateFileHashViaSFTP calculates the SHA256 hash of a remote file via SFTP.
+func calculateFileHashViaSFTP(remotePath string, sftpClient *sftp.Client) (string, error) {
+	if sftpClient == nil {
+		return "", fmt.Errorf("sftp client is required")
+	}
+
+	file, err := sftpClient.Open(remotePath)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	hash := sha256.New()
+	if _, err := io.Copy(hash, file); err != nil {
+		return "", err
+	}
+
+	return hex.EncodeToString(hash.Sum(nil)), nil
+}
+
+// filesAreEqual checks if two files are identical by comparing size and SHA256 hash.
+func filesAreEqual(localPath, remotePath string, client *ssh.Client, sftpClient *sftp.Client) (bool, error) {
+	localInfo, err := os.Stat(localPath)
+	if err != nil {
+		return false, err
+	}
+
+	remoteInfo, err := sftpClient.Stat(remotePath)
+	if err != nil {
+		return false, err
+	}
+
+	if localInfo.Size() != remoteInfo.Size() {
+		return false, nil
+	}
+
+	localHash, err := calculateFileHash(localPath)
+	if err != nil {
+		return false, err
+	}
+
+	remoteHash, err := getRemoteFileHash(client, remotePath, sftpClient)
+	if err != nil {
+		return false, err
+	}
+
+	return localHash == remoteHash, nil
+}
 
 // getAuthMethods determines the authentication methods based on the connection configuration.
 func getAuthMethods(conn *config.Connection) ([]ssh.AuthMethod, error) {
@@ -180,11 +284,11 @@ func TestConnection(conn *config.Connection) error {
 
 // UploadFile uploads a local file or directory to the remote server.
 func UploadFile(conn *config.Connection, localPath, remotePath string, recursive bool) error {
-	return UploadFileWithOpts(conn, localPath, remotePath, recursive, false)
+	return UploadFileWithOpts(conn, localPath, remotePath, recursive, false, false)
 }
 
 // UploadFileWithOpts uploads a local file or directory to the remote server with options.
-func UploadFileWithOpts(conn *config.Connection, localPath, remotePath string, recursive, force bool) error {
+func UploadFileWithOpts(conn *config.Connection, localPath, remotePath string, recursive, force, checksum bool) error {
 	client, err := newClient(conn)
 	if err != nil {
 		return err
@@ -206,19 +310,19 @@ func UploadFileWithOpts(conn *config.Connection, localPath, remotePath string, r
 		if !recursive {
 			return i18n.ErrorWith("ssh.error.directory.recursive", map[string]interface{}{"Path": localPath}, fmt.Errorf("is directory"))
 		}
-		return uploadDir(sftpClient, localPath, remotePath)
+		return uploadDir(sftpClient, client, conn, localPath, remotePath, checksum)
 	}
 
-	return uploadFileWithOpts(sftpClient, localPath, remotePath, force)
+	return uploadFileWithOpts(sftpClient, client, conn, localPath, remotePath, force, checksum)
 }
 
 // uploadFile uploads a single file.
-func uploadFile(sftpClient *sftp.Client, localPath, remotePath string) error {
-	return uploadFileWithOpts(sftpClient, localPath, remotePath, false)
+func uploadFile(sftpClient *sftp.Client, client *ssh.Client, conn *config.Connection, localPath, remotePath string, checksum bool) error {
+	return uploadFileWithOpts(sftpClient, client, conn, localPath, remotePath, false, checksum)
 }
 
 // uploadFileWithOpts uploads a single file with options.
-func uploadFileWithOpts(sftpClient *sftp.Client, localPath, remotePath string, force bool) error {
+func uploadFileWithOpts(sftpClient *sftp.Client, client *ssh.Client, conn *config.Connection, localPath, remotePath string, force, checksum bool) error {
 	srcFile, err := os.Open(localPath)
 	if err != nil {
 		return i18n.ErrorWith("ssh.error.open.local.file", map[string]interface{}{"Error": err}, err)
@@ -239,6 +343,19 @@ func uploadFileWithOpts(sftpClient *sftp.Client, localPath, remotePath string, f
 
 	remoteInfo, err = sftpClient.Stat(remotePath)
 	if err == nil {
+		if checksum {
+			equal, err := filesAreEqual(localPath, remotePath, client, sftpClient)
+			if err != nil {
+				return i18n.ErrorWith("ssh.error.checking.file", map[string]interface{}{"Error": err}, err)
+			}
+			if equal {
+				fmt.Println(i18n.TWith("ssh.file.unchanged", map[string]interface{}{
+					"Local":  localPath,
+					"Remote": remotePath,
+				}))
+				return nil
+			}
+		}
 		if !force {
 			return i18n.ErrorWith("ssh.error.remote.exists", map[string]interface{}{"Path": remotePath}, fmt.Errorf("file exists"))
 		}
@@ -270,7 +387,7 @@ func uploadFileWithOpts(sftpClient *sftp.Client, localPath, remotePath string, f
 }
 
 // uploadDir recursively uploads a directory.
-func uploadDir(sftpClient *sftp.Client, localPath, remotePath string) error {
+func uploadDir(sftpClient *sftp.Client, client *ssh.Client, conn *config.Connection, localPath, remotePath string, checksum bool) error {
 	err := sftpClient.MkdirAll(remotePath)
 	if err != nil {
 		return i18n.ErrorWith("ssh.error.create.remote.dir", map[string]interface{}{"Error": err}, err)
@@ -286,12 +403,12 @@ func uploadDir(sftpClient *sftp.Client, localPath, remotePath string) error {
 		remoteFilePath := filepath.Join(remotePath, entry.Name())
 
 		if entry.IsDir() {
-			err = uploadDir(sftpClient, localFilePath, remoteFilePath)
+			err = uploadDir(sftpClient, client, conn, localFilePath, remoteFilePath, checksum)
 			if err != nil {
 				return err
 			}
 		} else {
-			err = uploadFile(sftpClient, localFilePath, remoteFilePath)
+			err = uploadFile(sftpClient, client, conn, localFilePath, remoteFilePath, checksum)
 			if err != nil {
 				return err
 			}
@@ -303,11 +420,11 @@ func uploadDir(sftpClient *sftp.Client, localPath, remotePath string) error {
 
 // DownloadFile downloads a remote file or directory to the local machine.
 func DownloadFile(conn *config.Connection, remotePath, localPath string, recursive bool) error {
-	return DownloadFileWithOpts(conn, remotePath, localPath, recursive, false)
+	return DownloadFileWithOpts(conn, remotePath, localPath, recursive, false, false)
 }
 
 // DownloadFileWithOpts downloads a remote file or directory to the local machine with options.
-func DownloadFileWithOpts(conn *config.Connection, remotePath, localPath string, recursive, force bool) error {
+func DownloadFileWithOpts(conn *config.Connection, remotePath, localPath string, recursive, force, checksum bool) error {
 	client, err := newClient(conn)
 	if err != nil {
 		return err
@@ -329,19 +446,19 @@ func DownloadFileWithOpts(conn *config.Connection, remotePath, localPath string,
 		if !recursive {
 			return i18n.ErrorWith("ssh.error.directory.recursive", map[string]interface{}{"Path": remotePath}, fmt.Errorf("is directory"))
 		}
-		return downloadDir(sftpClient, remotePath, localPath)
+		return downloadDir(sftpClient, client, conn, remotePath, localPath, checksum)
 	}
 
-	return downloadFileWithOpts(sftpClient, remotePath, localPath, force)
+	return downloadFileWithOpts(sftpClient, client, conn, remotePath, localPath, force, checksum)
 }
 
 // downloadFile downloads a single file.
-func downloadFile(sftpClient *sftp.Client, remotePath, localPath string) error {
-	return downloadFileWithOpts(sftpClient, remotePath, localPath, false)
+func downloadFile(sftpClient *sftp.Client, client *ssh.Client, conn *config.Connection, remotePath, localPath string, checksum bool) error {
+	return downloadFileWithOpts(sftpClient, client, conn, remotePath, localPath, false, checksum)
 }
 
 // downloadFileWithOpts downloads a single file with options.
-func downloadFileWithOpts(sftpClient *sftp.Client, remotePath, localPath string, force bool) error {
+func downloadFileWithOpts(sftpClient *sftp.Client, client *ssh.Client, conn *config.Connection, remotePath, localPath string, force, checksum bool) error {
 	srcFile, err := sftpClient.Open(remotePath)
 	if err != nil {
 		return i18n.ErrorWith("ssh.error.open.remote.file", map[string]interface{}{"Error": err}, err)
@@ -362,6 +479,19 @@ func downloadFileWithOpts(sftpClient *sftp.Client, remotePath, localPath string,
 
 	localInfo, err = os.Stat(localPath)
 	if err == nil {
+		if checksum {
+			equal, err := filesAreEqual(localPath, remotePath, client, sftpClient)
+			if err != nil {
+				return i18n.ErrorWith("ssh.error.checking.file", map[string]interface{}{"Error": err}, err)
+			}
+			if equal {
+				fmt.Println(i18n.TWith("ssh.file.unchanged", map[string]interface{}{
+					"Remote": remotePath,
+					"Local":  localPath,
+				}))
+				return nil
+			}
+		}
 		if !force {
 			return i18n.ErrorWith("ssh.error.local.exists", map[string]interface{}{"Path": localPath}, fmt.Errorf("file exists"))
 		}
@@ -393,7 +523,7 @@ func downloadFileWithOpts(sftpClient *sftp.Client, remotePath, localPath string,
 }
 
 // downloadDir recursively downloads a directory.
-func downloadDir(sftpClient *sftp.Client, remotePath, localPath string) error {
+func downloadDir(sftpClient *sftp.Client, client *ssh.Client, conn *config.Connection, remotePath, localPath string, checksum bool) error {
 	err := os.MkdirAll(localPath, 0755)
 	if err != nil {
 		return i18n.ErrorWith("ssh.error.create.local.dir", map[string]interface{}{"Error": err}, err)
@@ -409,12 +539,12 @@ func downloadDir(sftpClient *sftp.Client, remotePath, localPath string) error {
 		localFilePath := filepath.Join(localPath, entry.Name())
 
 		if entry.IsDir() {
-			err = downloadDir(sftpClient, remoteFilePath, localFilePath)
+			err = downloadDir(sftpClient, client, conn, remoteFilePath, localFilePath, checksum)
 			if err != nil {
 				return err
 			}
 		} else {
-			err = downloadFile(sftpClient, remoteFilePath, localFilePath)
+			err = downloadFile(sftpClient, client, conn, remoteFilePath, localFilePath, checksum)
 			if err != nil {
 				return err
 			}

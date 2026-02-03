@@ -21,6 +21,7 @@ var scpCmd = &cobra.Command{
 func init() {
 	scpCmd.Flags().BoolP("recursive", "r", false, "Copy directories recursively")
 	scpCmd.Flags().BoolP("force", "f", false, "Force overwrite of existing files")
+	scpCmd.Flags().BoolP("checksum", "c", false, "Compare file content using checksum (slower but more accurate)")
 }
 
 func runScp(cmd *cobra.Command, args []string) {
@@ -32,6 +33,7 @@ func runScp(cmd *cobra.Command, args []string) {
 
 	recursive, _ := cmd.Flags().GetBool("recursive")
 	force, _ := cmd.Flags().GetBool("force")
+	checksum, _ := cmd.Flags().GetBool("checksum")
 	source := args[0]
 	destination := args[1]
 
@@ -76,7 +78,7 @@ func runScp(cmd *cobra.Command, args []string) {
 			"Path":  remotePath,
 			"Local": localPath,
 		}))
-		err = ssh.DownloadFileWithOpts(conn, remotePath, localPath, recursive, force)
+		err = ssh.DownloadFileWithOpts(conn, remotePath, localPath, recursive, force, checksum)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
@@ -104,7 +106,7 @@ func runScp(cmd *cobra.Command, args []string) {
 			"Host":  conn.Host,
 			"Path":  remotePath,
 		}))
-		err = ssh.UploadFileWithOpts(conn, localPath, remotePath, recursive, force)
+		err = ssh.UploadFileWithOpts(conn, localPath, remotePath, recursive, force, checksum)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
