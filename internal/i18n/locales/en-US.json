@@ -510,5 +510,65 @@
   {
     "id": "copy.flag.pubkey",
     "translation": "Path to your public key file"
+  },
+  {
+    "id": "add.flag.name",
+    "translation": "Connection name"
+  },
+  {
+    "id": "add.flag.group",
+    "translation": "Group name for the connection"
+  },
+  {
+    "id": "add.flag.user",
+    "translation": "Username"
+  },
+  {
+    "id": "add.flag.host",
+    "translation": "Host address"
+  },
+  {
+    "id": "add.flag.port",
+    "translation": "Port number"
+  },
+  {
+    "id": "add.flag.key",
+    "translation": "Path to private key"
+  },
+  {
+    "id": "add.flag.use-password",
+    "translation": "Use a saved password by its alias"
+  },
+  {
+    "id": "add.flag.interactive",
+    "translation": "Use interactive mode to add a new connection"
+  },
+  {
+    "id": "import.flag.force",
+    "translation": "Skip confirmation prompt before overwriting"
+  },
+  {
+    "id": "list.flag.group",
+    "translation": "Filter connections by group name"
+  },
+  {
+    "id": "scp.flag.recursive",
+    "translation": "Copy directories recursively"
+  },
+  {
+    "id": "scp.flag.force",
+    "translation": "Force overwrite of existing files"
+  },
+  {
+    "id": "scp.flag.parallel",
+    "translation": "Enable parallel transfer to multiple destinations"
+  },
+  {
+    "id": "scp.flag.quiet",
+    "translation": "Suppress progress bars"
+  },
+  {
+    "id": "scp.flag.group",
+    "translation": "Treat destination as group name"
   }
 ]

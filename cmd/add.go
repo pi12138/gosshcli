@@ -153,12 +153,12 @@ func credentialAliasExists(alias string) bool {
 }
 
 func init() {
-	addCmd.Flags().StringP("name", "n", "", "Connection name")
-	addCmd.Flags().StringP("group", "g", "", "Group name for the connection")
-	addCmd.Flags().StringP("user", "u", "", "Username")
-	addCmd.Flags().StringP("host", "H", "", "Host address")
-	addCmd.Flags().IntP("port", "p", 22, "Port number")
-	addCmd.Flags().StringP("key", "k", "", "Path to private key")
-	addCmd.Flags().StringP("use-password", "P", "", "Use a saved password by its alias")
-	addCmd.Flags().BoolP("interactive", "i", false, "Use interactive mode to add a new connection")
+	addCmd.Flags().StringP("name", "n", "", i18n.T("add.flag.name"))
+	addCmd.Flags().StringP("group", "g", "", i18n.T("add.flag.group"))
+	addCmd.Flags().StringP("user", "u", "", i18n.T("add.flag.user"))
+	addCmd.Flags().StringP("host", "H", "", i18n.T("add.flag.host"))
+	addCmd.Flags().IntP("port", "p", 22, i18n.T("add.flag.port"))
+	addCmd.Flags().StringP("key", "k", "", i18n.T("add.flag.key"))
+	addCmd.Flags().StringP("use-password", "P", "", i18n.T("add.flag.use-password"))
+	addCmd.Flags().BoolP("interactive", "i", false, i18n.T("add.flag.interactive"))
 }

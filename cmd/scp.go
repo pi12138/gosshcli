@@ -21,11 +21,11 @@ var scpCmd = &cobra.Command{
 }
 
 func init() {
-	scpCmd.Flags().BoolP("recursive", "r", false, "Copy directories recursively")
-	scpCmd.Flags().BoolP("force", "f", false, "Force overwrite of existing files")
-	scpCmd.Flags().BoolP("parallel", "p", false, "Enable parallel transfer to multiple destinations")
-	scpCmd.Flags().BoolP("quiet", "q", false, "Suppress progress bars")
-	scpCmd.Flags().BoolP("group", "g", false, "Treat destination as group name")
+	scpCmd.Flags().BoolP("recursive", "r", false, i18n.T("scp.flag.recursive"))
+	scpCmd.Flags().BoolP("force", "f", false, i18n.T("scp.flag.force"))
+	scpCmd.Flags().BoolP("parallel", "p", false, i18n.T("scp.flag.parallel"))
+	scpCmd.Flags().BoolP("quiet", "q", false, i18n.T("scp.flag.quiet"))
+	scpCmd.Flags().BoolP("group", "g", false, i18n.T("scp.flag.group"))
 }
 
 func runScp(cmd *cobra.Command, args []string) {
@@ -206,4 +206,3 @@ func findConnection(connections []config.Connection, name string) *config.Connec
 	}
 	return nil
 }
-

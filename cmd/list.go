@@ -96,5 +96,5 @@ func printConnectionInfo(c config.Connection, isGrouped bool) {
 }
 
 func init() {
-	listCmd.Flags().StringP("group", "g", "", "Filter connections by group name")
+	listCmd.Flags().StringP("group", "g", "", i18n.T("list.flag.group"))
 }
