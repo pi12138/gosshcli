@@ -180,11 +180,11 @@ func TestConnection(conn *config.Connection) error {
 
 // UploadFile uploads a local file or directory to the remote server.
 func UploadFile(conn *config.Connection, localPath, remotePath string, recursive bool) error {
-	return UploadFileWithOpts(conn, localPath, remotePath, recursive, false)
+	return UploadFileWithOpts(conn, localPath, remotePath, recursive, false, false)
 }
 
 // UploadFileWithOpts uploads a local file or directory to the remote server with options.
-func UploadFileWithOpts(conn *config.Connection, localPath, remotePath string, recursive, force bool) error {
+func UploadFileWithOpts(conn *config.Connection, localPath, remotePath string, recursive, force, quiet bool) error {
 	client, err := newClient(conn)
 	if err != nil {
 		return err
@@ -206,19 +206,19 @@ func UploadFileWithOpts(conn *config.Connection, localPath, remotePath string, r
 		if !recursive {
 			return i18n.ErrorWith("ssh.error.directory.recursive", map[string]interface{}{"Path": localPath}, fmt.Errorf("is directory"))
 		}
-		return uploadDir(sftpClient, localPath, remotePath)
+		return uploadDir(sftpClient, localPath, remotePath, quiet)
 	}
 
-	return uploadFileWithOpts(sftpClient, localPath, remotePath, force)
+	return uploadFileWithOpts(sftpClient, localPath, remotePath, force, quiet)
 }
 
 // uploadFile uploads a single file.
-func uploadFile(sftpClient *sftp.Client, localPath, remotePath string) error {
-	return uploadFileWithOpts(sftpClient, localPath, remotePath, false)
+func uploadFile(sftpClient *sftp.Client, localPath, remotePath string, quiet bool) error {
+	return uploadFileWithOpts(sftpClient, localPath, remotePath, false, quiet)
 }
 
 // uploadFileWithOpts uploads a single file with options.
-func uploadFileWithOpts(sftpClient *sftp.Client, localPath, remotePath string, force bool) error {
+func uploadFileWithOpts(sftpClient *sftp.Client, localPath, remotePath string, force, quiet bool) error {
 	srcFile, err := os.Open(localPath)
 	if err != nil {
 		return i18n.ErrorWith("ssh.error.open.local.file", map[string]interface{}{"Error": err}, err)
@@ -250,12 +250,16 @@ func uploadFileWithOpts(sftpClient *sftp.Client, localPath, remotePath string, f
 	}
 	defer dstFile.Close()
 
-	bar := pb.Full.Start64(fileSize)
-	bar.Set(pb.Bytes, true)
-	barReader := bar.NewProxyReader(srcFile)
-
-	bytes, err := io.Copy(dstFile, barReader)
-	bar.Finish()
+	var bytes int64
+	if !quiet {
+		bar := pb.Full.Start64(fileSize)
+		bar.Set(pb.Bytes, true)
+		barReader := bar.NewProxyReader(srcFile)
+		bytes, err = io.Copy(dstFile, barReader)
+		bar.Finish()
+	} else {
+		bytes, err = io.Copy(dstFile, srcFile)
+	}
 
 	if err != nil {
 		return i18n.ErrorWith("ssh.error.copying.file", map[string]interface{}{"Error": err}, err)
@@ -270,7 +274,7 @@ func uploadFileWithOpts(sftpClient *sftp.Client, localPath, remotePath string, f
 }
 
 // uploadDir recursively uploads a directory.
-func uploadDir(sftpClient *sftp.Client, localPath, remotePath string) error {
+func uploadDir(sftpClient *sftp.Client, localPath, remotePath string, quiet bool) error {
 	err := sftpClient.MkdirAll(remotePath)
 	if err != nil {
 		return i18n.ErrorWith("ssh.error.create.remote.dir", map[string]interface{}{"Error": err}, err)
@@ -286,12 +290,12 @@ func uploadDir(sftpClient *sftp.Client, localPath, remotePath string) error {
 		remoteFilePath := filepath.Join(remotePath, entry.Name())
 
 		if entry.IsDir() {
-			err = uploadDir(sftpClient, localFilePath, remoteFilePath)
+			err = uploadDir(sftpClient, localFilePath, remoteFilePath, quiet)
 			if err != nil {
 				return err
 			}
 		} else {
-			err = uploadFile(sftpClient, localFilePath, remoteFilePath)
+			err = uploadFile(sftpClient, localFilePath, remoteFilePath, quiet)
 			if err != nil {
 				return err
 			}
@@ -303,11 +307,11 @@ func uploadDir(sftpClient *sftp.Client, localPath, remotePath string) error {
 
 // DownloadFile downloads a remote file or directory to the local machine.
 func DownloadFile(conn *config.Connection, remotePath, localPath string, recursive bool) error {
-	return DownloadFileWithOpts(conn, remotePath, localPath, recursive, false)
+	return DownloadFileWithOpts(conn, remotePath, localPath, recursive, false, false)
 }
 
 // DownloadFileWithOpts downloads a remote file or directory to the local machine with options.
-func DownloadFileWithOpts(conn *config.Connection, remotePath, localPath string, recursive, force bool) error {
+func DownloadFileWithOpts(conn *config.Connection, remotePath, localPath string, recursive, force, quiet bool) error {
 	client, err := newClient(conn)
 	if err != nil {
 		return err
@@ -329,19 +333,19 @@ func DownloadFileWithOpts(conn *config.Connection, remotePath, localPath string,
 		if !recursive {
 			return i18n.ErrorWith("ssh.error.directory.recursive", map[string]interface{}{"Path": remotePath}, fmt.Errorf("is directory"))
 		}
-		return downloadDir(sftpClient, remotePath, localPath)
+		return downloadDir(sftpClient, remotePath, localPath, quiet)
 	}
 
-	return downloadFileWithOpts(sftpClient, remotePath, localPath, force)
+	return downloadFileWithOpts(sftpClient, remotePath, localPath, force, quiet)
 }
 
 // downloadFile downloads a single file.
-func downloadFile(sftpClient *sftp.Client, remotePath, localPath string) error {
-	return downloadFileWithOpts(sftpClient, remotePath, localPath, false)
+func downloadFile(sftpClient *sftp.Client, remotePath, localPath string, quiet bool) error {
+	return downloadFileWithOpts(sftpClient, remotePath, localPath, false, quiet)
 }
 
 // downloadFileWithOpts downloads a single file with options.
-func downloadFileWithOpts(sftpClient *sftp.Client, remotePath, localPath string, force bool) error {
+func downloadFileWithOpts(sftpClient *sftp.Client, remotePath, localPath string, force, quiet bool) error {
 	srcFile, err := sftpClient.Open(remotePath)
 	if err != nil {
 		return i18n.ErrorWith("ssh.error.open.remote.file", map[string]interface{}{"Error": err}, err)
@@ -373,12 +377,16 @@ func downloadFileWithOpts(sftpClient *sftp.Client, remotePath, localPath string,
 	}
 	defer dstFile.Close()
 
-	bar := pb.Full.Start64(fileSize)
-	bar.Set(pb.Bytes, true)
-	barReader := bar.NewProxyReader(srcFile)
-
-	bytes, err := io.Copy(dstFile, barReader)
-	bar.Finish()
+	var bytes int64
+	if !quiet {
+		bar := pb.Full.Start64(fileSize)
+		bar.Set(pb.Bytes, true)
+		barReader := bar.NewProxyReader(srcFile)
+		bytes, err = io.Copy(dstFile, barReader)
+		bar.Finish()
+	} else {
+		bytes, err = io.Copy(dstFile, srcFile)
+	}
 
 	if err != nil {
 		return i18n.ErrorWith("ssh.error.copying.file", map[string]interface{}{"Error": err}, err)
@@ -393,7 +401,7 @@ func downloadFileWithOpts(sftpClient *sftp.Client, remotePath, localPath string,
 }
 
 // downloadDir recursively downloads a directory.
-func downloadDir(sftpClient *sftp.Client, remotePath, localPath string) error {
+func downloadDir(sftpClient *sftp.Client, remotePath, localPath string, quiet bool) error {
 	err := os.MkdirAll(localPath, 0755)
 	if err != nil {
 		return i18n.ErrorWith("ssh.error.create.local.dir", map[string]interface{}{"Error": err}, err)
@@ -409,12 +417,12 @@ func downloadDir(sftpClient *sftp.Client, remotePath, localPath string) error {
 		localFilePath := filepath.Join(localPath, entry.Name())
 
 		if entry.IsDir() {
-			err = downloadDir(sftpClient, remoteFilePath, localFilePath)
+			err = downloadDir(sftpClient, remoteFilePath, localFilePath, quiet)
 			if err != nil {
 				return err
 			}
 		} else {
-			err = downloadFile(sftpClient, remoteFilePath, localFilePath)
+			err = downloadFile(sftpClient, remoteFilePath, localFilePath, quiet)
 			if err != nil {
 				return err
 			}
