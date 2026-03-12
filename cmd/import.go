@@ -65,6 +65,6 @@ var importCmd = &cobra.Command{
 }
 
 func init() {
-	importCmd.Flags().BoolP("force", "f", false, "Skip confirmation prompt before overwriting")
+	importCmd.Flags().BoolP("force", "f", false, i18n.T("import.flag.force"))
 	configCmd.AddCommand(importCmd)
 }

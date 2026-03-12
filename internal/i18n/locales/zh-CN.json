@@ -510,5 +510,53 @@
   {
     "id": "copy.flag.pubkey",
     "translation": "公钥文件路径"
+  },
+  {
+    "id": "add.flag.name",
+    "translation": "连接名称"
+  },
+  {
+    "id": "add.flag.group",
+    "translation": "连接的组名"
+  },
+  {
+    "id": "add.flag.user",
+    "translation": "用户名"
+  },
+  {
+    "id": "add.flag.host",
+    "translation": "主机地址"
+  },
+  {
+    "id": "add.flag.port",
+    "translation": "端口号"
+  },
+  {
+    "id": "add.flag.key",
+    "translation": "私钥路径"
+  },
+  {
+    "id": "add.flag.use-password",
+    "translation": "使用已保存的密码别名"
+  },
+  {
+    "id": "add.flag.interactive",
+    "translation": "使用交互模式添加新连接"
+  },
+  {
+    "id": "import.flag.force",
+    "translation": "覆盖前跳过确认提示"
+  },
+  {
+    "id": "list.flag.group",
+    "translation": "按组名过滤连接"
+  },
+  {
+    "id": "scp.flag.recursive",
+    "translation": "递归复制目录"
+  },
+  {
+    "id": "scp.flag.force",
+    "translation": "强制覆盖现有文件"
   }
 ]
