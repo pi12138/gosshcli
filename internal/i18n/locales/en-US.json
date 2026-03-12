@@ -205,7 +205,7 @@
   },
   {
     "id": "scp.long",
-    "translation": "Copy files or directories between local and remote hosts using SFTP.\n\nUsage:\n  - Upload:   gossh scp <local-path> <connection-name>:<remote-path>\n  - Download: gossh scp <connection-name>:<remote-path> <local-path>\n\nUse the -r flag to copy directories recursively.\n\nExamples:\n  gossh scp /local/file.txt myserver:/remote/path/\n  gossh scp myserver:/remote/file.txt /local/path/\n  gossh scp -r /local/directory myserver:/remote/path/\n  gossh scp -r myserver:/remote/directory /local/path/"
+    "translation": "Copy files or directories between local and remote hosts using SFTP.\n\nUsage:\n  - Upload:   gossh scp <local-path> <connection-or-group>:<remote-path> [...destinations]\n  - Download: gossh scp <connection-name>:<remote-path> <local-path>\n\nFeatures:\n  - Multiple targets: Specify one or more destinations.\n  - Parallel transfer: Use -p flag to enable simultaneous transfers to multiple machines.\n  - Comma-separated hosts: Shortcut to send to multiple hosts at once, e.g., host1,host2:/path.\n  - Group distribution: Use -g flag to treat destination as a group and send to all group members.\n\nExamples:\n  # Basic upload/download\n  gossh scp ./file.txt myserver:/tmp/\n  gossh scp myserver:/tmp/file.txt ./\n\n  # Distribute to multiple hosts (parallel)\n  gossh scp ./file.txt host1:/tmp/ host2:/var/log/ -p\n\n  # Distribute to multiple hosts with one path (parallel)\n  gossh scp ./file.txt host1,host2,host3:/tmp/ -p\n\n  # Distribute to an entire group (parallel)\n  gossh scp ./file.txt web_servers:/var/www/ -g -p\n\n  # Recursive copy\n  gossh scp -r ./my_dir myserver:/tmp/"
   },
   {
     "id": "scp.error.both.paths",

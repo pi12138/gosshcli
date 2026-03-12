@@ -205,7 +205,7 @@
   },
   {
     "id": "scp.long",
-    "translation": "使用 SFTP 在本地和远程主机之间复制文件或目录。\n\n用法:\n  - 上传:   gossh scp <本地路径> <连接名称>:<远程路径>\n  - 下载: gossh scp <连接名称>:<远程路径> <本地路径>\n\n使用 -r 标志递归复制目录。\n\n示例:\n  gossh scp /local/file.txt myserver:/remote/path/\n  gossh scp myserver:/remote/file.txt /local/path/\n  gossh scp -r /local/directory myserver:/remote/path/\n  gossh scp -r myserver:/remote/directory /local/path/"
+    "translation": "使用 SFTP 在本地和远程主机之间复制文件或目录。\n\n用法:\n  - 上传:   gossh scp <本地路径> <连接名称或组名>:<远程路径> [...目标]\n  - 下载:   gossh scp <连接名称>:<远程路径> <本地路径>\n\n功能特性:\n  - 支持多目标分发：可以指定多个远程目标。\n  - 支持并行传输：使用 -p 标志开启并行分发到多台机器。\n  - 支持主机列表：可以使用逗号分隔多个主机，例如 host1,host2:/path。\n  - 支持分组传输：使用 -g 标志将目标识别为组名，自动分发到组内所有主机。\n\n示例:\n  # 基础上传/下载\n  gossh scp ./file.txt myserver:/tmp/\n  gossh scp myserver:/tmp/file.txt ./\n\n  # 分发到多台主机 (并行)\n  gossh scp ./file.txt host1:/tmp/ host2:/var/log/ -p\n\n  # 使用逗号简写分发到多个主机的相同路径 (并行)\n  gossh scp ./file.txt host1,host2,host3:/tmp/ -p\n\n  # 分发到整个组 (并行)\n  gossh scp ./file.txt web_servers:/var/www/ -g -p\n\n  # 递归复制目录\n  gossh scp -r ./my_dir myserver:/tmp/"
   },
   {
     "id": "scp.error.both.paths",

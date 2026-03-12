@@ -25,6 +25,7 @@ func init() {
 	scpCmd.Flags().BoolP("force", "f", false, "Force overwrite of existing files")
 	scpCmd.Flags().BoolP("parallel", "p", false, "Enable parallel transfer to multiple destinations")
 	scpCmd.Flags().BoolP("quiet", "q", false, "Suppress progress bars")
+	scpCmd.Flags().BoolP("group", "g", false, "Treat destination as group name")
 }
 
 func runScp(cmd *cobra.Command, args []string) {
@@ -32,21 +33,57 @@ func runScp(cmd *cobra.Command, args []string) {
 	force, _ := cmd.Flags().GetBool("force")
 	parallel, _ := cmd.Flags().GetBool("parallel")
 	quiet, _ := cmd.Flags().GetBool("quiet")
+	isGroup, _ := cmd.Flags().GetBool("group")
 
 	source := args[0]
-	destinations := args[1:]
+	rawDestinations := args[1:]
 
 	sourceHasColon := strings.Contains(source, ":")
-
-	// Check for multi-device transfer requirement
-	if len(destinations) > 1 && !parallel {
-		fmt.Println("Error: Multiple destinations detected. Use -p or --parallel to enable multi-device transfer.")
-		os.Exit(1)
-	}
 
 	connections, err := config.LoadConnections()
 	if err != nil {
 		fmt.Println(i18n.TWith("error.loading.connections", map[string]interface{}{"Error": err}))
+		os.Exit(1)
+	}
+
+	// Resolve destinations
+	var destinations []string
+	if !sourceHasColon {
+		for _, rawDest := range rawDestinations {
+			if !strings.Contains(rawDest, ":") {
+				fmt.Printf("Error: Invalid destination format '%s'. Expected 'host:path' or 'group:path'\n", rawDest)
+				os.Exit(1)
+			}
+			parts := strings.SplitN(rawDest, ":", 2)
+			names := strings.Split(parts[0], ",")
+			remotePath := parts[1]
+
+			for _, name := range names {
+				name = strings.TrimSpace(name)
+				if isGroup {
+					foundGroup := false
+					for _, conn := range connections {
+						if conn.Group == name {
+							destinations = append(destinations, fmt.Sprintf("%s:%s", conn.Name, remotePath))
+							foundGroup = true
+						}
+					}
+					if !foundGroup {
+						fmt.Printf("Error: No connections found in group '%s'\n", name)
+						os.Exit(1)
+					}
+				} else {
+					destinations = append(destinations, fmt.Sprintf("%s:%s", name, remotePath))
+				}
+			}
+		}
+	} else {
+		destinations = rawDestinations
+	}
+
+	// Check for multi-device transfer requirement
+	if len(destinations) > 1 && !parallel {
+		fmt.Println("Error: Multiple destinations detected. Use -p or --parallel to enable multi-device transfer.")
 		os.Exit(1)
 	}
 
