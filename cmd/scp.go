@@ -19,8 +19,8 @@ var scpCmd = &cobra.Command{
 }
 
 func init() {
-	scpCmd.Flags().BoolP("recursive", "r", false, "Copy directories recursively")
-	scpCmd.Flags().BoolP("force", "f", false, "Force overwrite of existing files")
+	scpCmd.Flags().BoolP("recursive", "r", false, i18n.T("scp.flag.recursive"))
+	scpCmd.Flags().BoolP("force", "f", false, i18n.T("scp.flag.force"))
 }
 
 func runScp(cmd *cobra.Command, args []string) {
