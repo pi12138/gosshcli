@@ -1,4 +1,4 @@
-package cmd
+package configcmd
 
 import (
 	"fmt"
@@ -15,27 +15,45 @@ var listCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		filterGroup, _ := cmd.Flags().GetString("group")
 
-		connections, err := config.LoadConnections()
+		store, err := config.LoadStore()
 		if err != nil {
 			fmt.Println(i18n.TWith("error.loading.connections", map[string]interface{}{"Error": err}))
 			os.Exit(1)
 		}
 
-		if len(connections) == 0 {
+		if len(store.Connections) == 0 {
 			fmt.Println(i18n.T("list.no.connections"))
 			return
 		}
 
+		// Map connection names to their groups
+		connGroups := make(map[string][]string)
+		for _, g := range store.Groups {
+			for _, cName := range g.Connections {
+				connGroups[cName] = append(connGroups[cName], g.Name)
+			}
+		}
+
 		groups := make(map[string][]config.Connection)
 		var ungrouped []config.Connection
-		for _, c := range connections {
-			if filterGroup != "" && c.Group != filterGroup {
-				continue
-			}
-			if c.Group != "" {
-				groups[c.Group] = append(groups[c.Group], c)
+		
+		for _, rawConn := range store.Connections {
+			// Resolve to get inherited values
+			cPtr, _ := config.ResolveConnection(rawConn.Name)
+			c := *cPtr
+
+			cGroups := connGroups[c.Name]
+			if len(cGroups) > 0 {
+				for _, g := range cGroups {
+					if filterGroup != "" && g != filterGroup {
+						continue
+					}
+					groups[g] = append(groups[g], c)
+				}
 			} else {
-				ungrouped = append(ungrouped, c)
+				if filterGroup == "" {
+					ungrouped = append(ungrouped, c)
+				}
 			}
 		}
 
@@ -96,5 +114,6 @@ func printConnectionInfo(c config.Connection, isGrouped bool) {
 }
 
 func init() {
+	ConfigCmd.AddCommand(listCmd)
 	listCmd.Flags().StringP("group", "g", "", i18n.T("list.flag.group"))
 }

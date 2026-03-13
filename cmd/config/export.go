@@ -1,4 +1,4 @@
-package cmd
+package configcmd
 
 import (
 	"encoding/json"
@@ -51,5 +51,5 @@ var exportCmd = &cobra.Command{
 }
 
 func init() {
-	configCmd.AddCommand(exportCmd)
+	ConfigCmd.AddCommand(exportCmd)
 }

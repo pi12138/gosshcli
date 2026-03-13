@@ -12,6 +12,10 @@
     "translation": "加载连接时出错: {{.Error}}"
   },
   {
+    "id": "error.saving.connections",
+    "translation": "保存连接时出错: {{.Error}}"
+  },
+  {
     "id": "error.connection.not.found",
     "translation": "错误: 未找到连接 '{{.Name}}'"
   },
@@ -48,8 +52,8 @@
     "translation": "输入连接名称: "
   },
   {
-    "id": "add.enter.group",
-    "translation": "输入组（可选）: "
+    "id": "add.enter.groups",
+    "translation": "输入分组（可选，多个分组用逗号分隔）: "
   },
   {
     "id": "add.enter.username",
@@ -257,7 +261,7 @@
   },
   {
     "id": "groups.short",
-    "translation": "列出所有唯一的连接组名称"
+    "translation": "管理连接组"
   },
   {
     "id": "groups.none",
@@ -266,6 +270,62 @@
   {
     "id": "groups.available",
     "translation": "可用的组:"
+  },
+  {
+    "id": "groups.list.short",
+    "translation": "列出组或组内的连接"
+  },
+  {
+    "id": "groups.list.flag.detail",
+    "translation": "显示所有组的详细连接信息"
+  },
+  {
+    "id": "groups.connections.in.group",
+    "translation": "组 '{{.Group}}' 中的连接:"
+  },
+  {
+    "id": "groups.no.connections",
+    "translation": "在组 '{{.Group}}' 中未找到连接。"
+  },
+  {
+    "id": "groups.add.short",
+    "translation": "将现有连接添加到组"
+  },
+  {
+    "id": "groups.add.no.connections",
+    "translation": "请提供至少一个要添加到组的连接名称。"
+  },
+  {
+    "id": "groups.add.success",
+    "translation": "成功将 {{.Count}} 个连接添加到组 '{{.Group}}'。"
+  },
+  {
+    "id": "groups.add.not.found",
+    "translation": "警告: 未找到以下连接: {{.Names}}"
+  },
+  {
+    "id": "groups.remove.short",
+    "translation": "删除组并（可选）删除其下的连接"
+  },
+  {
+    "id": "groups.remove.ungroup.success",
+    "translation": "成功将 {{.Count}} 个连接从组 '{{.Group}}' 中移出。"
+  },
+  {
+    "id": "groups.remove.purge.success",
+    "translation": "成功删除组 '{{.Group}}' 下的 {{.Count}} 个连接。"
+  },
+  {
+    "id": "groups.remove.flag.purge",
+    "translation": "物理删除该组下的所有连接"
+  },
+  {
+    "id": "groups.exec.short",
+    "translation": "在组中的所有连接上执行命令"
+  },
+  {
+    "id": "groups.executing",
+    "translation": "正在组 '{{.Group}}' 的 {{.Count}} 个连接上执行命令 '{{.Command}}'..."
   },
   {
     "id": "import.short",
@@ -558,5 +618,81 @@
   {
     "id": "scp.flag.force",
     "translation": "强制覆盖现有文件"
+  },
+  {
+    "id": "exec.flag.group",
+    "translation": "在指定组中的所有连接上执行命令"
+  },
+  {
+    "id": "exec.error.usage",
+    "translation": "错误: 用法: gossh exec <名称> <命令> 或 gossh exec -g <组名> <命令>"
+  },
+  {
+    "id": "exec.error.command.required",
+    "translation": "错误: 必须提供命令。"
+  },
+  {
+    "id": "groups.create.short",
+    "translation": "创建一个新的空组"
+  },
+  {
+    "id": "groups.create.exists",
+    "translation": "错误: 组 '{{.Group}}' 已存在。"
+  },
+  {
+    "id": "groups.create.success",
+    "translation": "组 '{{.Group}}' 创建成功。"
+  },
+  {
+    "id": "groups.not.found",
+    "translation": "错误: 未找到组 '{{.Group}}'。"
+  },
+  {
+    "id": "groups.set.short",
+    "translation": "设置组的默认属性"
+  },
+  {
+    "id": "groups.set.no.changes",
+    "translation": "未指定任何更改。"
+  },
+  {
+    "id": "groups.set.success",
+    "translation": "组 '{{.Group}}' 更新成功。"
+  },
+  {
+    "id": "groups.set.flag.user",
+    "translation": "此组的默认用户名"
+  },
+  {
+    "id": "groups.set.flag.port",
+    "translation": "此组的默认端口"
+  },
+  {
+    "id": "groups.set.flag.key",
+    "translation": "此组的默认私钥路径"
+  },
+  {
+    "id": "groups.set.flag.use-password",
+    "translation": "此组的默认密码别名"
+  },
+  {
+    "id": "groups.remove.none.found",
+    "translation": "在此组中未找到任何指定的连接。"
+  },
+  {
+    "id": "groups.delete.short",
+    "translation": "删除整个组"
+  },
+  {
+    "id": "groups.delete.success",
+    "translation": "组 '{{.Group}}' 删除成功。"
+  },
+  {
+    "id": "groups.delete.purge.success",
+    "translation": "组 '{{.Group}}' 及其包含的 {{.Count}} 个连接已成功删除。"
+  },
+  {
+    "id": "groups.delete.flag.purge",
+    "translation": "物理删除属于此组的所有连接"
   }
 ]

@@ -12,6 +12,10 @@
     "translation": "Error loading connections: {{.Error}}"
   },
   {
+    "id": "error.saving.connections",
+    "translation": "Error saving connections: {{.Error}}"
+  },
+  {
     "id": "error.connection.not.found",
     "translation": "Error: connection '{{.Name}}' not found"
   },
@@ -48,8 +52,8 @@
     "translation": "Enter connection name: "
   },
   {
-    "id": "add.enter.group",
-    "translation": "Enter group (optional): "
+    "id": "add.enter.groups",
+    "translation": "Enter groups (comma separated, optional): "
   },
   {
     "id": "add.enter.username",
@@ -257,7 +261,7 @@
   },
   {
     "id": "groups.short",
-    "translation": "List all unique connection group names"
+    "translation": "Manage connection groups"
   },
   {
     "id": "groups.none",
@@ -266,6 +270,62 @@
   {
     "id": "groups.available",
     "translation": "Available groups:"
+  },
+  {
+    "id": "groups.list.short",
+    "translation": "List groups or connections within a group"
+  },
+  {
+    "id": "groups.list.flag.detail",
+    "translation": "Show all groups with detailed connection information"
+  },
+  {
+    "id": "groups.connections.in.group",
+    "translation": "Connections in group '{{.Group}}':"
+  },
+  {
+    "id": "groups.no.connections",
+    "translation": "No connections found in group '{{.Group}}'."
+  },
+  {
+    "id": "groups.add.short",
+    "translation": "Add existing connections to a group"
+  },
+  {
+    "id": "groups.add.no.connections",
+    "translation": "Please provide at least one connection name to add to the group."
+  },
+  {
+    "id": "groups.add.success",
+    "translation": "Successfully added {{.Count}} connections to group '{{.Group}}'."
+  },
+  {
+    "id": "groups.add.not.found",
+    "translation": "Warning: The following connections were not found: {{.Names}}"
+  },
+  {
+    "id": "groups.remove.short",
+    "translation": "Remove a group and optionally its connections"
+  },
+  {
+    "id": "groups.remove.ungroup.success",
+    "translation": "Successfully ungrouped {{.Count}} connections from '{{.Group}}'."
+  },
+  {
+    "id": "groups.remove.purge.success",
+    "translation": "Successfully deleted {{.Count}} connections belonging to '{{.Group}}'."
+  },
+  {
+    "id": "groups.remove.flag.purge",
+    "translation": "Physically delete all connections in this group"
+  },
+  {
+    "id": "groups.exec.short",
+    "translation": "Execute a command on all connections in a group"
+  },
+  {
+    "id": "groups.executing",
+    "translation": "Executing command '{{.Command}}' on {{.Count}} connections in group '{{.Group}}'..."
   },
   {
     "id": "import.short",
@@ -558,5 +618,81 @@
   {
     "id": "scp.flag.force",
     "translation": "Force overwrite of existing files"
+  },
+  {
+    "id": "exec.flag.group",
+    "translation": "Execute command on all connections in the specified group"
+  },
+  {
+    "id": "exec.error.usage",
+    "translation": "Error: Usage: gossh exec <name> <command> OR gossh exec -g <group> <command>"
+  },
+  {
+    "id": "exec.error.command.required",
+    "translation": "Error: command is required."
+  },
+  {
+    "id": "groups.create.short",
+    "translation": "Create a new empty group"
+  },
+  {
+    "id": "groups.create.exists",
+    "translation": "Error: Group '{{.Group}}' already exists."
+  },
+  {
+    "id": "groups.create.success",
+    "translation": "Group '{{.Group}}' created successfully."
+  },
+  {
+    "id": "groups.not.found",
+    "translation": "Error: Group '{{.Group}}' not found."
+  },
+  {
+    "id": "groups.set.short",
+    "translation": "Set default attributes for a group"
+  },
+  {
+    "id": "groups.set.no.changes",
+    "translation": "No changes specified."
+  },
+  {
+    "id": "groups.set.success",
+    "translation": "Group '{{.Group}}' updated successfully."
+  },
+  {
+    "id": "groups.set.flag.user",
+    "translation": "Default username for this group"
+  },
+  {
+    "id": "groups.set.flag.port",
+    "translation": "Default port for this group"
+  },
+  {
+    "id": "groups.set.flag.key",
+    "translation": "Default private key path for this group"
+  },
+  {
+    "id": "groups.set.flag.use-password",
+    "translation": "Default password alias for this group"
+  },
+  {
+    "id": "groups.remove.none.found",
+    "translation": "None of the specified connections were found in this group."
+  },
+  {
+    "id": "groups.delete.short",
+    "translation": "Delete an entire group"
+  },
+  {
+    "id": "groups.delete.success",
+    "translation": "Group '{{.Group}}' deleted successfully."
+  },
+  {
+    "id": "groups.delete.purge.success",
+    "translation": "Group '{{.Group}}' and its {{.Count}} connections were deleted successfully."
+  },
+  {
+    "id": "groups.delete.flag.purge",
+    "translation": "Physically delete all connections belonging to this group"
   }
 ]

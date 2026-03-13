@@ -1,4 +1,4 @@
-package cmd
+package configcmd
 
 import (
 	"bufio"
@@ -27,7 +27,7 @@ var addCmd = &cobra.Command{
 
 func runFlagBasedAdd(cmd *cobra.Command) {
 	name, _ := cmd.Flags().GetString("name")
-	group, _ := cmd.Flags().GetString("group")
+	groupStr, _ := cmd.Flags().GetString("group")
 	user, _ := cmd.Flags().GetString("user")
 	host, _ := cmd.Flags().GetString("host")
 	port, _ := cmd.Flags().GetInt("port")
@@ -38,6 +38,17 @@ func runFlagBasedAdd(cmd *cobra.Command) {
 		fmt.Println(i18n.T("add.error.name.user.host.required"))
 		os.Exit(1)
 	}
+
+	var groups []string
+	if groupStr != "" {
+		for _, g := range strings.Split(groupStr, ",") {
+			g = strings.TrimSpace(g)
+			if g != "" {
+				groups = append(groups, g)
+			}
+		}
+	}
+
 	if keyPath != "" && credAlias != "" {
 		fmt.Println(i18n.T("add.error.key.password.together"))
 		os.Exit(1)
@@ -50,7 +61,6 @@ func runFlagBasedAdd(cmd *cobra.Command) {
 
 	conn := config.Connection{
 		Name:            name,
-		Group:           group,
 		User:            user,
 		Host:            host,
 		Port:            port,
@@ -58,7 +68,39 @@ func runFlagBasedAdd(cmd *cobra.Command) {
 		CredentialAlias: credAlias,
 	}
 
-	if err := config.AddConnection(conn); err != nil {
+	store, err := config.LoadStore()
+	if err != nil {
+		fmt.Println(i18n.TWith("error.loading.connections", map[string]interface{}{"Error": err}))
+		os.Exit(1)
+	}
+
+	for _, c := range store.Connections {
+		if c.Name == conn.Name {
+			fmt.Println(i18n.TWith("add.error.adding.connection", map[string]interface{}{"Error": "connection already exists"}))
+			os.Exit(1)
+		}
+	}
+
+	store.Connections = append(store.Connections, conn)
+
+	for _, gName := range groups {
+		foundGroup := false
+		for i := range store.Groups {
+			if store.Groups[i].Name == gName {
+				store.Groups[i].Connections = append(store.Groups[i].Connections, conn.Name)
+				foundGroup = true
+				break
+			}
+		}
+		if !foundGroup {
+			store.Groups = append(store.Groups, config.Group{
+				Name:        gName,
+				Connections: []string{conn.Name},
+			})
+		}
+	}
+
+	if err := config.SaveStore(store); err != nil {
 		fmt.Println(i18n.TWith("add.error.adding.connection", map[string]interface{}{"Error": err}))
 		os.Exit(1)
 	}
@@ -73,9 +115,18 @@ func runInteractiveAdd() {
 	conn.Name, _ = reader.ReadString('\n')
 	conn.Name = strings.TrimSpace(conn.Name)
 
-	fmt.Print(i18n.T("add.enter.group"))
-	conn.Group, _ = reader.ReadString('\n')
-	conn.Group = strings.TrimSpace(conn.Group)
+	var groups []string
+	fmt.Print(i18n.T("add.enter.groups"))
+	groupStr, _ := reader.ReadString('\n')
+	groupStr = strings.TrimSpace(groupStr)
+	if groupStr != "" {
+		for _, g := range strings.Split(groupStr, ",") {
+			g = strings.TrimSpace(g)
+			if g != "" {
+				groups = append(groups, g)
+			}
+		}
+	}
 
 	fmt.Print(i18n.T("add.enter.username"))
 	conn.User, _ = reader.ReadString('\n')
@@ -132,7 +183,39 @@ func runInteractiveAdd() {
 		fmt.Println(i18n.T("add.invalid.auth.method"))
 	}
 
-	if err := config.AddConnection(conn); err != nil {
+	store, err := config.LoadStore()
+	if err != nil {
+		fmt.Println(i18n.TWith("error.loading.connections", map[string]interface{}{"Error": err}))
+		os.Exit(1)
+	}
+
+	for _, c := range store.Connections {
+		if c.Name == conn.Name {
+			fmt.Println(i18n.TWith("add.error.adding.connection", map[string]interface{}{"Error": "connection already exists"}))
+			os.Exit(1)
+		}
+	}
+
+	store.Connections = append(store.Connections, conn)
+
+	for _, gName := range groups {
+		foundGroup := false
+		for i := range store.Groups {
+			if store.Groups[i].Name == gName {
+				store.Groups[i].Connections = append(store.Groups[i].Connections, conn.Name)
+				foundGroup = true
+				break
+			}
+		}
+		if !foundGroup {
+			store.Groups = append(store.Groups, config.Group{
+				Name:        gName,
+				Connections: []string{conn.Name},
+			})
+		}
+	}
+
+	if err := config.SaveStore(store); err != nil {
 		fmt.Println(i18n.TWith("add.error.adding.connection", map[string]interface{}{"Error": err}))
 		os.Exit(1)
 	}
@@ -153,6 +236,7 @@ func credentialAliasExists(alias string) bool {
 }
 
 func init() {
+	ConfigCmd.AddCommand(addCmd)
 	addCmd.Flags().StringP("name", "n", "", i18n.T("add.flag.name"))
 	addCmd.Flags().StringP("group", "g", "", i18n.T("add.flag.group"))
 	addCmd.Flags().StringP("user", "u", "", i18n.T("add.flag.user"))

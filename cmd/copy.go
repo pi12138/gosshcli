@@ -29,18 +29,9 @@ func runCopy(cmd *cobra.Command, args []string) {
 			fmt.Println(i18n.T("copy.error.args.with.name"))
 			os.Exit(1)
 		}
-		connections, err := config.LoadConnections()
+		var err error
+		conn, err = config.ResolveConnection(connName)
 		if err != nil {
-			fmt.Println(i18n.TWith("error.loading.connections", map[string]interface{}{"Error": err}))
-			os.Exit(1)
-		}
-		for i, c := range connections {
-			if c.Name == connName {
-				conn = &connections[i]
-				break
-			}
-		}
-		if conn == nil {
 			fmt.Println(i18n.TWith("error.connection.not.found", map[string]interface{}{"Name": connName}))
 			os.Exit(1)
 		}

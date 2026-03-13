@@ -1,4 +1,4 @@
-package cmd
+package configcmd
 
 import (
 	"fmt"
@@ -23,4 +23,5 @@ var removeCmd = &cobra.Command{
 }
 
 func init() {
+	ConfigCmd.AddCommand(removeCmd)
 }

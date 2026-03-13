@@ -48,12 +48,6 @@ func runScp(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	connections, err := config.LoadConnections()
-	if err != nil {
-		fmt.Println(i18n.TWith("error.loading.connections", map[string]interface{}{"Error": err}))
-		os.Exit(1)
-	}
-
 	if sourceHasColon {
 		parts := strings.SplitN(source, ":", 2)
 		if len(parts) != 2 {
@@ -64,8 +58,8 @@ func runScp(cmd *cobra.Command, args []string) {
 		remotePath := parts[1]
 		localPath := destination
 
-		conn := findConnection(connections, connName)
-		if conn == nil {
+		conn, err := config.ResolveConnection(connName)
+		if err != nil {
 			fmt.Println(i18n.TWith("error.connection.not.found", map[string]interface{}{"Name": connName}))
 			os.Exit(1)
 		}
@@ -92,8 +86,8 @@ func runScp(cmd *cobra.Command, args []string) {
 		remotePath := parts[1]
 		localPath := source
 
-		conn := findConnection(connections, connName)
-		if conn == nil {
+		conn, err := config.ResolveConnection(connName)
+		if err != nil {
 			fmt.Println(i18n.TWith("error.connection.not.found", map[string]interface{}{"Name": connName}))
 			os.Exit(1)
 		}
@@ -111,13 +105,4 @@ func runScp(cmd *cobra.Command, args []string) {
 		}
 		fmt.Println(i18n.T("scp.upload.success"))
 	}
-}
-
-func findConnection(connections []config.Connection, name string) *config.Connection {
-	for i, c := range connections {
-		if c.Name == name {
-			return &connections[i]
-		}
-	}
-	return nil
 }

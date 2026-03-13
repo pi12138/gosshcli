@@ -1,4 +1,4 @@
-package cmd
+package configcmd
 
 import (
 	"bufio"
@@ -66,5 +66,5 @@ var importCmd = &cobra.Command{
 
 func init() {
 	importCmd.Flags().BoolP("force", "f", false, i18n.T("import.flag.force"))
-	configCmd.AddCommand(importCmd)
+	ConfigCmd.AddCommand(importCmd)
 }

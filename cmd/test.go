@@ -17,21 +17,8 @@ var testCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		connectionName := args[0]
 
-		connections, err := config.LoadConnections()
+		conn, err := config.ResolveConnection(connectionName)
 		if err != nil {
-			fmt.Println(i18n.TWith("error.loading.connections", map[string]interface{}{"Error": err}))
-			os.Exit(1)
-		}
-
-		var conn *config.Connection
-		for i, c := range connections {
-			if c.Name == connectionName {
-				conn = &connections[i]
-				break
-			}
-		}
-
-		if conn == nil {
 			fmt.Println(i18n.TWith("error.connection.not.found", map[string]interface{}{"Name": connectionName}))
 			os.Exit(1)
 		}
